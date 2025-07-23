@@ -45,6 +45,7 @@ private:
   int fMaxFile;
 
   bool fIsLive;
+  bool fDraw;
   bool fAuxPlotting;
   bool fAuxCut;
 };

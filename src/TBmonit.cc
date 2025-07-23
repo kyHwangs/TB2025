@@ -27,6 +27,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TGraph.h"
+#include "TROOT.h"
 
 template <typename T>
 TBmonit<T>::TBmonit(const std::string &fConfig_, int fRunNum_)
@@ -35,7 +36,7 @@ TBmonit<T>::TBmonit(const std::string &fConfig_, int fRunNum_)
   fIsLive = false;
   fAuxPlotting = false;
   fAuxCut  = false;
-
+  fDraw = false;
   fUtility = TButility();
 }
 
@@ -59,6 +60,9 @@ TBmonit<T>::TBmonit(ObjectCollection* fObj_)
   fObj->GetVariable("LIVE", &fIsLive);
   fObj->GetVariable("AUX", &fAuxPlotting);
   fObj->GetVariable("AUXcut", &fAuxCut);
+  fObj->GetVariable("DRAW", &fDraw);
+
+  gROOT->SetBatch(!fDraw);
 
   if (fIsLive) {
     fMaxEvent = -1;
@@ -116,8 +120,8 @@ void TBmonit<T>::LoopLive() {
 
   ANSI_CODE ANSI = ANSI_CODE();
 
-  TBplotengine fPlotter = TBplotengine(fConfig.GetConfig()["ModuleConfig"], fRunNum, fIsLive, fUtility);
-  TBaux fAux = TBaux(fConfig.GetConfig()["AUX"], fRunNum, fAuxPlotting, fIsLive, fUtility);
+  TBplotengine fPlotter = TBplotengine(fConfig.GetConfig()["ModuleConfig"], fRunNum, fIsLive, fDraw, fUtility);
+  TBaux fAux = TBaux(fConfig.GetConfig()["AUX"], fRunNum, fAuxPlotting, fIsLive, fDraw, fUtility);
 
   std::string aCase;
   fObj->GetVariable("type", &aCase); //'single', 'heatmap'
@@ -177,8 +181,6 @@ void TBmonit<T>::LoopLive() {
       tUniqueMID
     );
 
-
-
     while(1) {
       readerWave.CheckNextFileExistence();
 
@@ -212,8 +214,10 @@ void TBmonit<T>::LoopLive() {
             continue;
 
         fPlotter.Fill(anEvent);
+
         if (fAuxPlotting)
           fAux.Fill(anEvent);
+
       }
       fPlotter.Update();
       if (fAuxPlotting)
@@ -227,8 +231,8 @@ void TBmonit<T>::LoopAfterRun() {
 
   ANSI_CODE ANSI = ANSI_CODE();
 
-  TBplotengine fPlotter = TBplotengine(fConfig.GetConfig()["ModuleConfig"], fRunNum, fIsLive, fUtility);
-  TBaux fAux = TBaux(fConfig.GetConfig()["AUX"], fRunNum, fAuxPlotting, fIsLive, fUtility);
+  TBplotengine fPlotter = TBplotengine(fConfig.GetConfig()["ModuleConfig"], fRunNum, fIsLive, fDraw, fUtility);
+  TBaux fAux = TBaux(fConfig.GetConfig()["AUX"], fRunNum, fAuxPlotting, fIsLive, fDraw, fUtility);
 
   std::string aCase;
   fObj->GetVariable("type", &aCase); //'single', 'heatmap', 'module'

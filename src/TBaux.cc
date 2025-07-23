@@ -6,8 +6,8 @@
 #include <sys/types.h>
 
 
-TBaux::TBaux(const YAML::Node fNodePlot_, int fRunNum_, bool fPlotting_, bool fLive_, TButility fUtility_)
-: fNodeAux(fNodePlot_), fRunNum(fRunNum_), fPlotting(fPlotting_), fLive(fLive_), fUtility(fUtility_)
+TBaux::TBaux(const YAML::Node fNodePlot_, int fRunNum_, bool fPlotting_, bool fLive_, bool fDraw_, TButility fUtility_)
+: fNodeAux(fNodePlot_), fRunNum(fRunNum_), fPlotting(fPlotting_), fLive(fLive_), fDraw(fDraw_), fUtility(fUtility_)
 {
 
   fIsFirst = true;
@@ -363,10 +363,16 @@ void TBaux::Update() {
 
   if (fIsFirst) fIsFirst = false;
 
-  SaveAs("");
+  // SaveAs("");
   fCanvas->cd();
   fCanvas->Update();
-  fCanvas->Pad()->Draw();
+  if (fDraw) fCanvas->Pad()->Draw();
+
+  TString output = "./output/Run" + std::to_string(fRunNum) + "_AUX.root";
+  TFile* outoutFile = new TFile(output, "RECREATE");
+  outoutFile->cd();
+  fCanvas->Write();
+  outoutFile->Close();
 
   // if (!fLive) {
   //   fApp->Run(false);

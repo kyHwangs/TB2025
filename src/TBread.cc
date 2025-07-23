@@ -174,8 +174,7 @@ template <typename T>
 bool FileController<T>::CheckSingleNextFileExistence() {
 
   std::string tmpFileName = GetFileName(fMode, fNextFileNum);
-
-  if (access(tmpFileName.c_str(), F_OK))
+  if (access(tmpFileName.c_str(), F_OK))   
     return false;
 
   return true;

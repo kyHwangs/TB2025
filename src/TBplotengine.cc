@@ -4,8 +4,8 @@
 #include "TStyle.h"
 #include "TPaveStats.h"
 
-TBplotengine::TBplotengine(const YAML::Node fConfig_, int fRunNum_, bool fLive_, TButility fUtility_)
-: fConfig(fConfig_), fRunNum(fRunNum_), fLive(fLive_), fUtility(fUtility_), fCaseName("")
+TBplotengine::TBplotengine(const YAML::Node fConfig_, int fRunNum_, bool fLive_, bool fDraw_, TButility fUtility_)
+: fConfig(fConfig_), fRunNum(fRunNum_), fLive(fLive_), fDraw(fDraw_), fUtility(fUtility_), fCaseName("")
 {}
 
 void TBplotengine::init() {
@@ -13,6 +13,15 @@ void TBplotengine::init() {
   fIsFirst = true;
   fUsingAUX = false;
   gStyle->SetPalette(kRainBow);
+
+  std::vector<int> fColorVec = {
+    TColor::GetColor("#5790fc"),
+    TColor::GetColor("#f89c20"),
+    TColor::GetColor("#e42536"),
+    TColor::GetColor("#964a8b"),
+    TColor::GetColor("#9c9ca1"),
+    TColor::GetColor("#7a21dd")
+  };
 
   if (fCaseName == "single") {
 
@@ -43,17 +52,13 @@ void TBplotengine::init() {
         if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
           fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";PeakADC;nEvents", 288, -512., 4096.));
 
-        fPlotter_Ceren.at(i).hist1D->SetLineColor(
-          gStyle->GetColorPalette((float)(i + 1) * ((float)gStyle->GetNumberOfColors() / ((float)fNametoPlot.size() + 1)))
-        );
+        fPlotter_Ceren.at(i).hist1D->SetLineColor(fColorVec.at(i));
         fPlotter_Ceren.at(i).hist1D->SetLineWidth(2);
 
       } else if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
         fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo, 0, 0));
         fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";Bin;ADC", 1000, 0.5, 1000.5));
-        fPlotter_Ceren.at(i).hist1D->SetLineColor(
-          gStyle->GetColorPalette((float)(i + 1) * ((float)gStyle->GetNumberOfColors() / ((float)fNametoPlot.size() + 1)))
-        );
+        fPlotter_Ceren.at(i).hist1D->SetLineColor(fColorVec.at(i));
         fPlotter_Ceren.at(i).hist1D->SetLineWidth(2);
         fPlotter_Ceren.at(i).hist1D->SetStats(0);
 
@@ -487,6 +492,7 @@ double TBplotengine::GetPeakADC(std::vector<short> waveform, int xInit, int xFin
 }
 
 double TBplotengine::GetIntADC(std::vector<short> waveform, int xInit, int xFin) {
+
   double ped = 0;
   for (int i = 1; i < 101; i++)
     ped += (double)waveform.at(i) / 100.;
@@ -740,20 +746,28 @@ void TBplotengine::Update() {
     fIsFirst = false;
   }
 
-  SaveAs("");
+  // SaveAs("");
   fCanvas->cd();
   fCanvas->Update();
-  fCanvas->Pad()->Draw();
+  if (fDraw) fCanvas->Pad()->Draw();
+
+  TString output = "./output/Run" + std::to_string(fRunNum) + "_" + fCaseName + "_" + fMethod + "_" + fModule + ".root";
+  TFile* outoutFile = new TFile(output, "RECREATE");
+  outoutFile->cd();
+  fCanvas->Write();
+  outoutFile->Close();
 
   // if (fUsingAUX) gSystem->ProcessEvents();
   // else           fApp->Run(false);
 
   // std::cout << fLive << " " << fUsingAUX << std::endl;
 
-  if (fLive && fUsingAUX) gSystem->ProcessEvents();
-  if (fLive && !fUsingAUX) gSystem->ProcessEvents();
-  if (!fLive && fUsingAUX) gSystem->ProcessEvents();
-  if (!fLive && !fUsingAUX) fApp->Run(false);
+  if (fDraw) {
+    if (fLive && fUsingAUX) gSystem->ProcessEvents();
+    if (fLive && !fUsingAUX) gSystem->ProcessEvents();
+    if (!fLive && fUsingAUX) gSystem->ProcessEvents();
+    if (!fLive && !fUsingAUX) fApp->Run(false);
+  }
 
 
 

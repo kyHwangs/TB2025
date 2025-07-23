@@ -1,0 +1,2634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TB2025 ROOT Browser & Command Interface</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+    }
+    #sidebar {
+      width: 338px;
+      background: #f4f4f4;
+      border-right: 1px solid #ccc;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    #sidebar h2 {
+      margin: 0;
+      padding: 15px;
+      background: #333;
+      color: white;
+      font-size: 18px;
+      text-align: center;
+    }
+    
+    #sidebarTitle {
+      margin: 0;
+      padding: 20px 15px;
+      background: white;
+      color: #333;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-bottom: 1px solid #e0e0e0;
+      position: relative;
+    }
+    
+
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    #fileList {
+      list-style: none;
+      padding: 0;
+    }
+    #fileList li {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+    #fileList li:hover {
+      background: #f0f0f0;
+    }
+    #fileList li.active {
+      background: #4285f4;
+      color: white;
+    }
+    
+    /* File list item styles removed - using dropdown styles instead */
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    #tabs {
+      display: flex;
+      background: #f0f0f0;
+      border-bottom: 1px solid #ccc;
+    }
+
+    
+    .tab-button {
+      padding: 10px 15px;
+      cursor: pointer;
+      border: none;
+      background: #dc3545;
+      color: white;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 4px;
+      margin-left: auto;
+      margin-right: 10px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .tab-button:hover {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+    
+    .tab-button:active {
+      transform: translateY(0);
+    }
+    
+    .tab-button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      opacity: 0.6;
+      transform: none;
+    }
+    #content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+    }
+    .panel.active {
+      display: flex;
+    }
+    #hierarchy {
+      height: 0px;
+      border-bottom: none;
+      overflow: hidden;
+      padding: 0;
+      background: transparent;
+      display: none;
+    }
+    
+    /* Dropdown styles for sidebar */
+    .file-item {
+      margin-bottom: 5px;
+    }
+    
+    .file-header {
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+    
+    .file-header:hover {
+      background: #e9ecef;
+    }
+    
+    .file-header.active {
+      background: #4285f4;
+      color: white;
+      border-color: #4285f4;
+    }
+    
+    .file-dropdown-icon {
+      transition: transform 0.2s ease;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .file-header.active .file-dropdown-icon {
+      color: white;
+    }
+    
+    .file-dropdown-icon.expanded {
+      transform: rotate(90deg);
+    }
+    
+    .file-contents {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: #f8f9fa;
+      border-left: 3px solid #4285f4;
+      margin-left: 10px;
+      border-radius: 0 0 4px 4px;
+    }
+    
+    .file-contents.expanded {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .content-item {
+      padding: 8px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid #e9ecef;
+      transition: background 0.2s ease;
+      font-size: 13px;
+      color: #333;
+    }
+    
+    .content-item:hover {
+      background: #e3f2fd;
+    }
+    
+    .content-item:last-child {
+      border-bottom: none;
+    }
+    #drawing {
+      flex: 1;
+      position: relative;
+      background: #f0f0f0;
+      background-image: 
+        radial-gradient(circle, #ddd 1px, transparent 1px);
+      background-size: 20px 20px;
+      overflow: hidden;
+    }
+    #commandPanel {
+      padding: 10px;
+      flex-direction: column;
+      height: auto;
+    }
+    #commandInput {
+      display: flex;
+      margin-bottom: 10px;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    #commandText {
+      flex: 1;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 25px;
+      line-height: 1.0;
+      resize: vertical;
+      min-height: 25px;
+      background: #f9f9f9;
+    }
+    #commandText:focus {
+      outline: none;
+      border-color: #4285f4;
+      background: #fff;
+    }
+    #killBtn {
+      padding: 15px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 25px;
+      font-weight: 500;
+      white-space: nowrap;
+      align-self: flex-start;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    #killBtn:hover:not(:disabled) {
+      background: #c82333;
+    }
+    #killBtn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .kill-all-btn {
+      padding: 15px;
+      background: #fd7e14;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 25px;
+      font-weight: 500;
+      white-space: nowrap;
+      align-self: flex-start;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      gap: 5px;
+    }
+    
+    .kill-all-btn:hover {
+      background: #e66a00;
+      transform: translateY(-1px);
+    }
+    
+    .kill-all-btn:active {
+      transform: translateY(0);
+    }
+    
+    /* Lock Icon Styles */
+    #lockIcon {
+      margin-right: 5px;
+      font-size: 16px;
+    }
+    
+    /* Command Panel Locked State */
+    .command-panel-locked {
+      opacity: 0.5;
+      pointer-events: none;
+      position: relative;
+    }
+    
+    .command-panel-locked::before {
+      content: "🔒 Access Restricted - Enter security code to unlock";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+      font-size: 18px;
+      color: #666;
+      pointer-events: auto;
+    }
+    
+    /* Security Modal Styles */
+    .security-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      width: 400px;
+      max-width: 90%;
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .modal-content p {
+      margin-bottom: 20px;
+      color: #555;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+    }
+
+    .modal-buttons button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .modal-buttons #verifyBtn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .modal-buttons #verifyBtn:hover {
+      background-color: #45a049;
+    }
+
+    .modal-buttons #cancelBtn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .modal-buttons #cancelBtn:hover {
+      background-color: #d32f2f;
+    }
+
+    .security-error {
+      color: #f44336;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    #commandOutput {
+      flex: 1;
+      background: #2d2d2d;
+      color: #f0f0f0;
+      font-family: 'Courier New', monospace;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      height: 780px;
+      max-height: 780px;
+      max-width: 100%;
+      box-sizing: border-box;
+      line-height: 1.15;
+    }
+    #status {
+      padding: 8px;
+      background: #f9f9f9;
+      border-top: 1px solid #ccc;
+      font-size: 14px;
+      color: #666;
+    }
+    .command-history {
+      color: #4CAF50;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .command-output {
+      margin-bottom: 3px;
+    }
+    .command-error {
+      color: #f44336;
+    }
+
+    /* Plot Window styles */
+    .plot-window {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      min-width: 300px;
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      z-index: 1;
+    }
+
+    .plot-window.active {
+      z-index: 100;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .plot-window-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+      user-select: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .plot-window-title {
+      flex: 1;
+      margin-right: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .plot-window-controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .plot-window-btn {
+      width: 18px;
+      height: 18px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .plot-window-close {
+      background: #ff5f56;
+      color: white;
+    }
+
+    .plot-window-close:hover {
+      background: #ff3b30;
+    }
+
+    .plot-window-body {
+      flex: 1;
+      padding: 10px;
+      overflow: auto;
+      position: relative;
+    }
+
+    .plot-window-resize-handle {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
+      cursor: nw-resize;
+      background: linear-gradient(-45deg, transparent 0%, transparent 40%, #ccc 40%, #ccc 60%, transparent 60%);
+    }
+
+    .plot-item {
+      cursor: pointer;
+      padding: 8px;
+      margin: 2px 0;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .plot-item:hover {
+      background: #e3f2fd;
+    }
+
+    .plot-item:active {
+      background: #bbdefb;
+    }
+
+    .canvas-welcome {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #999;
+      font-size: 18px;
+      font-style: italic;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .window-count {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 12px;
+      pointer-events: none;
+    }
+    
+    /* Monit Command Builder Form Styles */
+    .monit-form {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-title {
+      margin: 0 0 20px 0;
+      color: #333;
+      font-size: 18px;
+      font-weight: 600;
+      border-bottom: 2px solid #4285f4;
+      padding-bottom: 8px;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      align-items: end;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    
+    .form-group-wide {
+      flex: 2;
+    }
+    
+    .form-group-button {
+      align-self: stretch;
+      display: flex;
+      align-items: end;
+    }
+    
+    .form-group label {
+      font-weight: 500;
+      margin-bottom: 5px;
+      color: #555;
+      font-size: 14px;
+    }
+    
+    .form-group input[type="number"],
+    .form-group input[type="text"],
+    .form-group select {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      background: white;
+      transition: border-color 0.2s ease;
+    }
+    
+    .form-group input[type="number"]:focus,
+    .form-group input[type="text"]:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #4285f4;
+      box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+    }
+    
+    .checkbox-label {
+      display: flex !important;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 500 !important;
+      margin-bottom: 0 !important;
+      color: #555 !important;
+    }
+    
+    .checkbox-label input[type="checkbox"] {
+      margin-right: 8px;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    
+    .execute-monit-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+      width: 100%;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .execute-monit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.6s ease;
+    }
+    
+    .execute-monit-btn:hover::before {
+      left: 100%;
+    }
+    
+    .execute-monit-btn:hover {
+      background: linear-gradient(135deg, #218838, #1eb584);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(40, 167, 69, 0.5);
+      letter-spacing: 0.8px;
+    }
+    
+    .execute-monit-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+    }
+    
+    .execute-monit-btn:focus {
+      outline: none;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4), 0 0 0 3px rgba(40, 167, 69, 0.2);
+    }
+    
+    .command-preview {
+      margin-top: 15px;
+      padding: 12px;
+      background: #2d2d2d;
+      border-radius: 4px;
+      border: 1px solid #444;
+    }
+    
+    .command-preview label {
+      display: block;
+      color: #ccc;
+      font-size: 12px;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .preview-text {
+      font-family: 'Courier New', monospace;
+      color: #4CAF50;
+      font-size: 13px;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+    
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    
+    .logo-image {
+      width: 280px;
+      height: auto;
+      max-width: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.1));
+    }
+    
+    #tabBar {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      position: relative;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .tabs-wrapper {
+      display: flex;
+      flex: 1;
+      gap: 8px;
+    }
+    
+    .tab {
+      padding: 8px 16px;
+      cursor: pointer;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      color: #666;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .tab:hover {
+      background: #f8f9fa;
+      border-color: #d0d7de;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    
+    .tab.active {
+      background: linear-gradient(135deg, #4285f4 0%, #1976d2 100%);
+      border-color: #1976d2;
+      color: white;
+      font-weight: 600;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(66, 133, 244, 0.3);
+    }
+    
+    .tab.active:hover {
+      background: linear-gradient(135deg, #3367d6 0%, #1565c0 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+    }
+    
+    #systemInfo {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      margin-right: 15px;
+      font-size: 11px;
+      color: #666;
+      gap: 1px;
+      min-width: 200px;
+    }
+    
+    #currentTime {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #333;
+    }
+    
+    #browserMemory {
+      font-weight: 400;
+      opacity: 0.8;
+      color: #555;
+    }
+    
+    #serverInfo {
+      font-weight: 400;
+      opacity: 0.8;
+      color: #555;
+    }
+
+    
+
+    .sidebar-controls {
+      padding: 15px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #f8f9fa;
+    }
+    
+    .sidebar-button {
+      width: 100%;
+      padding: 10px 15px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .sidebar-button:hover {
+      background: linear-gradient(135deg, #ff5252 0%, #d63031 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .sidebar-button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <div id="sidebarTitle">
+      <!-- DREAM FOR FUTURE Logo -->
+      <div class="logo-container">
+        <img src="DREAM_LOGO.png" alt="DREAM FOR FUTURE" class="logo-image">
+      </div>
+    </div>
+    
+    <!-- Close All Windows Button -->
+    <div class="sidebar-controls">
+      <button id="closeAllWindowsBtn" class="sidebar-button" onclick="closeAllPlotWindows()" title="Close all plot windows">
+        🗑️ Close All Windows
+      </button>
+    </div>
+    
+    <ul id="fileList">
+      <!-- Files will be populated here -->
+    </ul>
+  </div>
+  
+  <div id="main">
+    <div id="tabBar">
+      <div class="tabs-wrapper">
+        <div class="tab active" data-panel="rootPanel">ROOT Files</div>
+        <div class="tab" data-panel="commandPanel">
+          <span id="lockIcon">🔒</span> Command Interface
+        </div>
+      </div>
+      
+      <!-- System Info Panel -->
+      <div id="systemInfo">
+        <div id="currentTime"></div>
+        <div id="browserMemory"></div>
+        <div id="serverInfo"></div>
+      </div>
+    </div>
+    
+    <!-- Security Code Modal -->
+    <div id="securityModal" class="security-modal">
+      <div class="modal-content">
+        <h3>🔐 Command Interface Access</h3>
+        <p>Enter security code to access the command interface:</p>
+        <input type="password" id="securityCode" placeholder="Enter code..." maxlength="20">
+        <div class="modal-buttons">
+          <button id="verifyBtn">Verify</button>
+          <button id="cancelBtn">Cancel</button>
+        </div>
+        <div id="securityError" class="security-error"></div>
+      </div>
+    </div>
+    
+    <!-- Process Kill Confirmation Modal -->
+    <div id="processKillModal" class="security-modal">
+      <div class="modal-content" style="width: 600px; max-width: 95%;">
+        <h3>⚠️ Kill ./monit Processes</h3>
+        <p>The following ./monit processes will be terminated:</p>
+        <div id="processList" style="max-height: 300px; overflow-y: auto; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px; margin: 15px 0; font-family: 'Courier New', monospace; font-size: 12px;">
+          <div style="text-align: center; color: #666; padding: 20px;">Loading processes...</div>
+        </div>
+        <div class="modal-buttons">
+          <button id="confirmKillBtn" style="background-color: #dc3545;">Kill All</button>
+          <button id="cancelKillBtn" style="background-color: #6c757d;">Cancel</button>
+        </div>
+        <div id="killError" class="security-error"></div>
+      </div>
+    </div>
+    
+    <div id="content">
+      <!-- ROOT Browser Panel -->
+      <div id="rootPanel" class="panel active">
+        <div id="drawing">
+          <div class="canvas-welcome">
+            Click on a plot item from the sidebar to open it in this canvas<br>
+            Multiple windows can be opened simultaneously
+          </div>
+          <div class="window-count" id="windowCount" style="display: none;">
+            Windows: 0
+          </div>
+        </div>
+      </div>
+      
+      <!-- Command Interface Panel -->
+      <div id="commandPanel" class="panel">
+        <div id="commandInput">
+          <textarea id="commandText" placeholder="Enter command and press Enter to execute (most commands allowed, except rm and cd)" rows="1"></textarea>
+          <button id="killBtn" disabled>Kill Process</button>
+          <button id="killAllMonitBtn" class="kill-all-btn">Kill All ./monit</button>
+        </div>
+        <div id="commandOutput">Welcome to TB2025 Command Interface
+Environment initialization available - click 'Initialize Env' to setup required environment variables.
+Most commands are allowed except: rm, cd (for security)
+Type a command and press Enter to execute.
+
+</div>
+        
+        <!-- Monit Command Builder Form -->
+        <div id="monitForm" class="monit-form">
+          <h3 class="form-title">🚀 Monit Command Builder</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="runNumber">Run #:</label>
+              <input type="number" id="runNumber" placeholder="6034" min="1" max="99999">
+            </div>
+            
+            <div class="form-group">
+              <label for="typeSelect">Type:</label>
+              <select id="typeSelect">
+                <option value="single">single</option>
+                <option value="module" selected>module</option>
+                <option value="heatmap">heatmap</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="methodSelect">Method:</label>
+              <select id="methodSelect">
+                <option value="IntADC" selected>IntADC</option>
+                <option value="PeakADC">PeakADC</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="moduleInput">Module:</label>
+              <input type="text" id="moduleInput" placeholder="M5 (or M1-T1-S PS MC M2-T4-S for multiple)">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="liveCheck">
+                <span class="checkmark"></span>
+                LIVE
+              </label>
+            </div>
+            
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="auxCheck">
+                <span class="checkmark"></span>
+                AUX
+              </label>
+            </div>
+            
+            <div class="form-group form-group-button">
+              <button id="executeMonitBtn" class="execute-monit-btn">
+                ▶️ Execute ./monit
+              </button>
+            </div>
+          </div>
+          
+          <div class="command-preview">
+            <label>Generated Command:</label>
+            <div id="commandPreview" class="preview-text">./monit --RunNumber 6034 --type module --method IntADC --module M5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="status">Ready</div>
+  </div>
+
+  <!-- Load JSROOT locally -->
+  <script src="jsroot.js"></script>
+  <script>
+    // Global variables
+    let jsrootReady = false;
+    let currentFile = null;
+    let windowCounter = 0;
+    let activeWindow = null;
+    let windows = new Map();
+    let currentEventSource = null; // 현재 실행 중인 EventSource 추적
+    let lastOutputElement = null; // 마지막 출력 요소 추적
+    let pendingTabSwitch = null; // 보안 확인 후 전환할 탭 저장
+    let currentFileList = []; // 현재 파일 목록 추적
+    let fileRefreshInterval = null; // 파일 새로고침 인터벌
+    
+    // Security functionality
+    function checkCommandAccess() {
+      return localStorage.getItem('commandAccess') === 'granted';
+    }
+    
+    function setCommandAccess(granted) {
+      if (granted) {
+        localStorage.setItem('commandAccess', 'granted');
+        } else {
+        localStorage.removeItem('commandAccess');
+      }
+      updateLockState();
+    }
+    
+    function updateLockState() {
+      const hasAccess = checkCommandAccess();
+      const commandPanel = document.getElementById('commandPanel');
+      const lockIcon = document.getElementById('lockIcon');
+      
+      if (hasAccess) {
+        lockIcon.textContent = '🔓'; // 열린 자물쇠
+        commandPanel.classList.remove('command-panel-locked');
+      } else {
+        lockIcon.textContent = '🔒'; // 잠긴 자물쇠
+        commandPanel.classList.add('command-panel-locked');
+      }
+    }
+    
+    function showSecurityModal() {
+      const securityModal = document.getElementById('securityModal');
+      const securityCode = document.getElementById('securityCode');
+      const securityError = document.getElementById('securityError');
+      
+      securityModal.style.display = 'flex';
+      securityCode.value = '';
+      securityError.textContent = '';
+      securityCode.focus();
+    }
+    
+    function hideSecurityModal() {
+      const securityModal = document.getElementById('securityModal');
+      securityModal.style.display = 'none';
+      pendingTabSwitch = null;
+    }
+    
+    function verifySecurityCode() {
+      const securityCode = document.getElementById('securityCode');
+      const securityError = document.getElementById('securityError');
+      const verifyBtn = document.getElementById('verifyBtn');
+      
+      const code = securityCode.value.trim();
+      
+      if (!code) {
+        securityError.textContent = 'Please enter the security code';
+        return;
+      }
+      
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = 'Verifying...';
+      
+      fetch('/verify_code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: code })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          setCommandAccess(true);
+          hideSecurityModal();
+          
+          // 보안 확인 후 대기 중인 탭으로 전환
+          if (pendingTabSwitch) {
+            switchToPanel(pendingTabSwitch);
+          }
+        } else {
+          securityError.textContent = data.message || 'Invalid security code';
+          securityCode.select();
+        }
+      })
+      .catch(error => {
+        console.error('Error verifying code:', error);
+        securityError.textContent = 'Error verifying code. Please try again.';
+      })
+      .finally(() => {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Verify';
+      });
+    }
+    
+    function switchToPanel(panelId) {
+      // Remove active class from all tabs and panels
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      
+      // Add active class to selected tab and panel
+      document.querySelector(`[data-panel="${panelId}"]`).classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+    }
+    
+    // Window management functionality
+    function createPlotWindow(objectName, rootFile) {
+      windowCounter++;
+      const windowId = `window_${windowCounter}`;
+      
+      // Create window element with larger initial size
+      const windowElement = document.createElement('div');
+      windowElement.className = 'plot-window';
+      windowElement.id = windowId;
+      windowElement.style.left = `${50 + (windowCounter - 1) * 30}px`;
+      windowElement.style.top = `${50 + (windowCounter - 1) * 30}px`;
+      windowElement.style.width = '600px';  // Increased from 400px
+      windowElement.style.height = '500px'; // Increased from 350px
+      
+      windowElement.innerHTML = `
+        <div class="plot-window-header">
+          <div class="plot-window-title">${objectName}</div>
+          <div class="plot-window-controls">
+            <button class="plot-window-btn plot-window-close" onclick="closePlotWindow('${windowId}')">&times;</button>
+          </div>
+        </div>
+        <div class="plot-window-body">
+          <div style="text-align: center; padding: 20px; color: #666;">Loading plot...</div>
+        </div>
+        <div class="plot-window-resize-handle"></div>
+      `;
+      
+      // Add to canvas
+      const canvas = document.getElementById('drawing');
+      canvas.appendChild(windowElement);
+      
+      // Make window active
+      makeWindowActive(windowId);
+      
+      // Add drag functionality
+      makeWindowDraggable(windowElement);
+      
+      // Add resize functionality with auto-refresh
+      makeWindowResizable(windowElement, windowId);
+      
+      // Add click to activate
+      windowElement.addEventListener('mousedown', () => makeWindowActive(windowId));
+      
+      // Store window reference
+      windows.set(windowId, {
+        element: windowElement,
+        objectName: objectName,
+        rootFile: rootFile
+      });
+      
+      // Load and draw the plot
+      loadPlotInWindow(windowId, objectName, rootFile);
+      
+      // Update window count
+      updateWindowCount();
+      
+      return windowId;
+    }
+    
+    function closePlotWindow(windowId) {
+      const windowData = windows.get(windowId);
+      if (windowData) {
+        // Clean up ResizeObserver if it exists
+        if (windowData.element.resizeObserver) {
+          windowData.element.resizeObserver.disconnect();
+        }
+        
+        windowData.element.remove();
+        windows.delete(windowId);
+        
+        // If this was the active window, clear active state
+        if (activeWindow === windowId) {
+          activeWindow = null;
+          // Make another window active if available
+          if (windows.size > 0) {
+            const firstWindowId = windows.keys().next().value;
+            makeWindowActive(firstWindowId);
+          }
+        }
+        
+        updateWindowCount();
+      }
+    }
+    
+    function makeWindowActive(windowId) {
+      // Remove active class from all windows
+      document.querySelectorAll('.plot-window').forEach(w => w.classList.remove('active'));
+      
+      // Add active class to selected window
+      const windowElement = document.getElementById(windowId);
+      if (windowElement) {
+        windowElement.classList.add('active');
+        activeWindow = windowId;
+      }
+    }
+    
+    function loadPlotInWindow(windowId, objectName, rootFile) {
+      const windowData = windows.get(windowId);
+      if (!windowData) return;
+      
+      const body = windowData.element.querySelector('.plot-window-body');
+      
+      // Show loading state
+      body.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Loading plot...</div>';
+      
+      rootFile.readObject(objectName).then(obj => {
+        if (obj) {
+          body.innerHTML = '';
+          
+          // Try different drawing options in order of preference
+          const drawOptions = [
+            'hist',      // Default histogram
+            'colz',      // Color plot
+            'lego',      // 3D lego plot
+            'surf',      // Surface plot
+            'box',       // Box plot
+            '',          // Default JSROOT option
+            'same'       // Same as previous
+          ];
+          
+          let optionIndex = 0;
+          
+          function tryDrawWithOption() {
+            if (optionIndex >= drawOptions.length) {
+              // All options failed, show detailed error
+              body.innerHTML = `
+                <div style="color: red; text-align: center; padding: 20px;">
+                  <h4>❌ Failed to draw object</h4>
+                  <p><strong>Object:</strong> ${objectName}</p>
+                  <p><strong>Type:</strong> ${obj._typename || 'Unknown'}</p>
+                  <p><strong>Error:</strong> All drawing options failed</p>
+                  <details style="margin-top: 10px; text-align: left;">
+                    <summary style="cursor: pointer; font-weight: bold;">Object Details</summary>
+                    <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; margin-top: 5px; font-size: 11px; overflow: auto;">${JSON.stringify(obj, null, 2).substring(0, 1000)}${JSON.stringify(obj, null, 2).length > 1000 ? '...' : ''}</pre>
+                  </details>
+                  <button onclick="tryAlternativeDrawing('${windowId}', '${objectName}')" style="margin-top: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                    🔄 Try Alternative Methods
+                  </button>
+                </div>
+              `;
+              return;
+            }
+            
+            const option = drawOptions[optionIndex];
+            
+            JSROOT.draw(body, obj, option).then(() => {
+              // Success! Update window title with drawing option info
+              const titleElement = windowData.element.querySelector('.plot-window-title');
+              if (titleElement && option) {
+                titleElement.textContent = `${objectName} (${option})`;
+              }
+            }).catch(err => {
+              // This option failed, try next one
+              optionIndex++;
+              setTimeout(tryDrawWithOption, 100); // Small delay before trying next option
+            });
+          }
+          
+          // Start trying draw options
+          tryDrawWithOption();
+          
+        } else {
+          body.innerHTML = `
+            <div style="color: orange; text-align: center; padding: 20px;">
+              <h4>⚠️ Object not found</h4>
+              <p><strong>Object:</strong> ${objectName}</p>
+              <p>The object could not be loaded from the ROOT file.</p>
+              <button onclick="reloadRootObject('${windowId}', '${objectName}')" style="margin-top: 10px; padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                🔄 Retry Loading
+              </button>
+            </div>
+          `;
+        }
+      }).catch(err => {
+        // Enhanced error display with troubleshooting options
+        body.innerHTML = `
+          <div style="color: red; text-align: center; padding: 20px;">
+            <h4>❌ Error loading object</h4>
+            <p><strong>Object:</strong> ${objectName}</p>
+            <p><strong>Error:</strong> ${err.message || err}</p>
+            <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; color: #856404;">
+              <h5 style="margin: 0 0 10px 0;">💡 Troubleshooting Tips:</h5>
+              <ul style="text-align: left; margin: 0; padding-left: 20px;">
+                <li>The ROOT file might still be writing</li>
+                <li>The object might be corrupted</li>
+                <li>JSROOT might not support this object type</li>
+                <li>Try refreshing the file list</li>
+              </ul>
+            </div>
+            <div style="margin-top: 15px;">
+              <button onclick="reloadRootObject('${windowId}', '${objectName}')" style="margin: 5px; padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                🔄 Retry Loading
+              </button>
+              <button onclick="inspectRootObject('${windowId}', '${objectName}')" style="margin: 5px; padding: 5px 10px; background: #17a2b8; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                🔍 Inspect Object
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+    
+    function makeWindowDraggable(windowElement) {
+      const header = windowElement.querySelector('.plot-window-header');
+      let isDragging = false;
+      let startX, startY, startLeft, startTop;
+      
+      header.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.plot-window-btn')) return;
+        
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseInt(windowElement.style.left) || 0;
+        startTop = parseInt(windowElement.style.top) || 0;
+        
+        header.style.cursor = 'grabbing';
+        e.preventDefault();
+      });
+      
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        
+        const newLeft = startLeft + (e.clientX - startX);
+        const newTop = startTop + (e.clientY - startY);
+        
+        // Keep window within canvas bounds
+        const canvas = document.getElementById('drawing');
+        const canvasRect = canvas.getBoundingClientRect();
+        const windowRect = windowElement.getBoundingClientRect();
+        
+        const maxLeft = canvasRect.width - windowRect.width;
+        const maxTop = canvasRect.height - windowRect.height;
+        
+        windowElement.style.left = `${Math.max(0, Math.min(newLeft, maxLeft))}px`;
+        windowElement.style.top = `${Math.max(0, Math.min(newTop, maxTop))}px`;
+      });
+      
+      document.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          header.style.cursor = 'move';
+        }
+      });
+    }
+    
+    function makeWindowResizable(windowElement, windowId) {
+      const resizeHandle = windowElement.querySelector('.plot-window-resize-handle');
+      let isResizing = false;
+      let startX, startY, startWidth, startHeight;
+      
+      resizeHandle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = parseInt(window.getComputedStyle(windowElement).width);
+        startHeight = parseInt(window.getComputedStyle(windowElement).height);
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
+      document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        
+        const newWidth = Math.max(300, startWidth + (e.clientX - startX));
+        const newHeight = Math.max(250, startHeight + (e.clientY - startY));
+        
+        windowElement.style.width = `${newWidth}px`;
+        windowElement.style.height = `${newHeight}px`;
+      });
+      
+      document.addEventListener('mouseup', () => {
+        if (isResizing) {
+          isResizing = false;
+          
+          // Refresh JSROOT plot after resizing is complete
+          setTimeout(() => {
+            refreshPlotInWindow(windowId);
+          }, 100); // Small delay to let DOM update
+        }
+      });
+      
+      // Use ResizeObserver for automatic plot refresh when window size changes
+      if (window.ResizeObserver) {
+        const resizeObserver = new ResizeObserver(entries => {
+          for (let entry of entries) {
+            if (entry.target === windowElement && !isResizing) {
+              // Only refresh if not currently being manually resized
+              setTimeout(() => {
+                refreshPlotInWindow(windowId);
+              }, 50);
+            }
+          }
+        });
+        resizeObserver.observe(windowElement);
+        
+        // Store observer reference for cleanup if needed
+        if (!windowElement.resizeObserver) {
+          windowElement.resizeObserver = resizeObserver;
+        }
+      }
+    }
+    
+    function updateWindowCount() {
+      const countElement = document.getElementById('windowCount');
+      const welcomeElement = document.querySelector('.canvas-welcome');
+      const closeAllBtn = document.getElementById('closeAllWindowsBtn');
+      
+      if (windows.size > 0) {
+        countElement.textContent = `Windows: ${windows.size}`;
+        countElement.style.display = 'block';
+        welcomeElement.style.display = 'none';
+        if (closeAllBtn) closeAllBtn.disabled = false;
+      } else {
+        countElement.style.display = 'none';
+        welcomeElement.style.display = 'block';
+        if (closeAllBtn) closeAllBtn.disabled = true;
+      }
+    }
+    
+    function closeAllPlotWindows() {
+      if (windows.size === 0) return;
+      
+      const windowCount = windows.size;
+      
+      // Close all windows
+      const windowIds = Array.from(windows.keys());
+      windowIds.forEach(windowId => {
+        closePlotWindow(windowId);
+      });
+      
+      // Show confirmation message
+      const statusElement = document.getElementById('status');
+      if (statusElement) {
+        statusElement.textContent = `Closed ${windowCount} plot window${windowCount > 1 ? 's' : ''}`;
+        setTimeout(() => {
+          statusElement.textContent = 'Ready';
+        }, 3000);
+      }
+    }
+    
+    // Command Interface functions
+    function updateKillButtonState() {
+      const killBtn = document.getElementById('killBtn');
+      if (!killBtn) return;
+      
+      // 프로세스 상태 확인
+      fetch('/process_status')
+        .then(response => response.json())
+        .then(data => {
+          if (data.running) {
+            killBtn.disabled = false;
+            killBtn.textContent = `Kill Process (${data.pid})`;
+          } else {
+            killBtn.disabled = true;
+            killBtn.textContent = 'Kill Process';
+          }
+      })
+      .catch(error => {
+          console.error('Error checking process status:', error);
+          killBtn.disabled = true;
+          killBtn.textContent = 'Kill Process';
+        });
+    }
+    
+    function killProcess() {
+      fetch('/kill_process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          addToOutput('Process terminated by user', 'command-error');
+          if (currentEventSource) {
+            currentEventSource.close();
+            currentEventSource = null;
+          }
+        } else {
+          addToOutput(`Failed to kill process: ${data.message}`, 'command-error');
+        }
+        addToOutput(''); // Empty line for spacing
+        updateKillButtonState();
+      })
+      .catch(error => {
+        addToOutput(`Error killing process: ${error}`, 'command-error');
+        addToOutput(''); // Empty line for spacing
+      });
+    }
+    
+    function addToOutput(text, className, shouldOverwrite = false) {
+      const commandOutput = document.getElementById('commandOutput');
+      if (!commandOutput) return;
+      
+      // 더 넓은 진행률 패턴 감지
+      const isProgressLine = /(\d+\s*\/\s*\d+\s+(events|processed|entries))|(\d+%)|(\[\s*\d+\s*\/\s*\d+\s*\])|(\d+\s+of\s+\d+)/i.test(text);
+      
+      // 다양한 ANSI 코드 형태 감지 (\x1b, \033, \u001b)
+      const hasCarriageReturn = text.includes('\r');
+      const hasCursorUp = /[\x1b\u001b\033]\[F/.test(text) || /[\x1b\u001b\033]\[A/.test(text);
+      const hasCursorMovement = /[\x1b\u001b\033]\[[\d;]*[ABCD]/.test(text);
+      const hasBothCodes = hasCarriageReturn && hasCursorUp;
+      
+      // 덮어쓰기 조건 확장
+      const shouldReallyOverwrite = shouldOverwrite || 
+                                   isProgressLine || 
+                                   hasBothCodes || 
+                                   (hasCarriageReturn && !text.includes('\n')) ||
+                                   hasCursorUp ||
+                                   hasCursorMovement;
+      
+      // 덮어쓰기 처리
+      if (shouldReallyOverwrite && lastOutputElement && lastOutputElement.parentNode) {
+        
+        // 텍스트 정리: 다양한 ANSI 이스케이프 코드 제거
+        const cleanText = text
+          .replace(/\r/g, '')
+          .replace(/[\x1b\u001b\033]\[F/g, '')
+          .replace(/[\x1b\u001b\033]\[A/g, '')
+          .replace(/[\x1b\u001b\033]\[[\d;]*[ABCD]/g, '');
+        
+        const htmlText = convertAnsiToHtml(cleanText);
+        
+        lastOutputElement.innerHTML = htmlText;
+        lastOutputElement.className = className || lastOutputElement.className;
+        
+        commandOutput.scrollTop = commandOutput.scrollHeight;
+        
+        // 진행률이나 덮어쓰기 라인임을 표시 (디버깅용)
+        if (isProgressLine) {
+          lastOutputElement.setAttribute('data-progress', 'true');
+        }
+        
+        return;
+      }
+      
+      // 새 요소 생성
+      const div = document.createElement('div');
+      if (className) div.className = className;
+      
+      // ANSI escape codes를 HTML로 변환
+      const cleanText = text.replace(/\r.*$/gm, function(match) {
+        return match.substring(1); // \r 이후 텍스트만 유지
+      });
+      const htmlText = convertAnsiToHtml(cleanText);
+      div.innerHTML = htmlText;
+      
+      commandOutput.appendChild(div);
+      lastOutputElement = div; // 마지막 요소 기록
+      
+      // 진행률 라인임을 표시 (디버깅용)
+      if (isProgressLine) {
+        div.setAttribute('data-progress', 'true');
+      }
+      
+      commandOutput.scrollTop = commandOutput.scrollHeight;
+    }
+    
+    function convertAnsiToHtml(text) {
+      // ANSI escape code to HTML conversion
+      const ansiMap = {
+        // Reset - handle ESC[0m, ESC[00m
+        '(?:\\x1b|\\u001b|\\033)\\[0m': '</span>',
+        '(?:\\x1b|\\u001b|\\033)\\[00m': '</span>',
+        
+        // Text styles
+        '(?:\\x1b|\\u001b|\\033)\\[1m': '<span style="font-weight: bold;">',
+        '(?:\\x1b|\\u001b|\\033)\\[3m': '<span style="font-style: italic;">',
+        '(?:\\x1b|\\u001b|\\033)\\[4m': '<span style="text-decoration: underline;">',
+        
+        // Foreground colors
+        '(?:\\x1b|\\u001b|\\033)\\[30m': '<span style="color: #000000;">',  // Black
+        '(?:\\x1b|\\u001b|\\033)\\[31m': '<span style="color: #cd0000;">',  // Red
+        '(?:\\x1b|\\u001b|\\033)\\[32m': '<span style="color: #00cd00;">',  // Green
+        '(?:\\x1b|\\u001b|\\033)\\[33m': '<span style="color: #cdcd00;">',  // Yellow
+        '(?:\\x1b|\\u001b|\\033)\\[34m': '<span style="color: #0000ee;">',  // Blue
+        '(?:\\x1b|\\u001b|\\033)\\[35m': '<span style="color: #cd00cd;">',  // Magenta
+        '(?:\\x1b|\\u001b|\\033)\\[36m': '<span style="color: #00cdcd;">',  // Cyan
+        '(?:\\x1b|\\u001b|\\033)\\[37m': '<span style="color: #e5e5e5;">',  // White
+        
+        // Bright foreground colors
+        '(?:\\x1b|\\u001b|\\033)\\[90m': '<span style="color: #7f7f7f;">',  // Bright Black (Gray)
+        '(?:\\x1b|\\u001b|\\033)\\[91m': '<span style="color: #ff0000;">',  // Bright Red
+        '(?:\\x1b|\\u001b|\\033)\\[92m': '<span style="color: #00ff00;">',  // Bright Green
+        '(?:\\x1b|\\u001b|\\033)\\[93m': '<span style="color: #ffff00;">',  // Bright Yellow
+        '(?:\\x1b|\\u001b|\\033)\\[94m': '<span style="color: #5c5cff;">',  // Bright Blue
+        '(?:\\x1b|\\u001b|\\033)\\[95m': '<span style="color: #ff00ff;">',  // Bright Magenta
+        '(?:\\x1b|\\u001b|\\033)\\[96m': '<span style="color: #00ffff;">',  // Bright Cyan
+        '(?:\\x1b|\\u001b|\\033)\\[97m': '<span style="color: #ffffff;">',  // Bright White
+      };
+      
+      let result = text;
+      
+      // First, convert common escape character representations to actual escape character
+      result = result.replace(/\\x1b/g, '\x1b');
+      result = result.replace(/\\033/g, '\x1b');
+      
+      // Replace ANSI codes with HTML
+      for (const [ansi, html] of Object.entries(ansiMap)) {
+        const regex = new RegExp(ansi, 'g');
+        result = result.replace(regex, html);
+      }
+      
+      // Handle cursor movement codes (remove them as we handle positioning differently)
+      result = result.replace(/(?:\x1b|\u001b|\033)\[F/g, '');     // Cursor up to previous line
+      result = result.replace(/(?:\x1b|\u001b|\033)\[A/g, '');     // Cursor up
+      result = result.replace(/(?:\x1b|\u001b|\033)\[B/g, '');     // Cursor down
+      result = result.replace(/(?:\x1b|\u001b|\033)\[C/g, '');     // Cursor right
+      result = result.replace(/(?:\x1b|\u001b|\033)\[D/g, '');     // Cursor left
+      result = result.replace(/(?:\x1b|\u001b|\033)\[K/g, '');     // Clear to end of line
+      result = result.replace(/(?:\x1b|\u001b|\033)\[J/g, '');     // Clear screen
+      result = result.replace(/(?:\x1b|\u001b|\033)\[[\d;]*[ABCDFGHJK]/g, ''); // Other cursor/clear codes
+      
+      // Handle any remaining unprocessed ANSI codes by removing them
+      result = result.replace(/(?:\x1b|\u001b|\033)\[[\d;]*m/g, '');
+      
+      // Remove any remaining escape characters that might show as boxes
+      result = result.replace(/[\x1b\u001b\033]/g, '');
+      
+      // Convert newlines to <br> tags
+      result = result.replace(/\n/g, '<br>');
+      
+      return result;
+    }
+    
+    function executeCommandStream(command) {
+      if (!command.trim()) return;
+      
+      // 보안 코드 확인
+      if (!checkCommandAccess()) {
+        addToOutput('🔒 Access denied. Please unlock first.', 'command-error');
+        return;
+      }
+      
+      // 명령어 히스토리에 추가
+      addToOutput(`$ ${command}`, 'command-history');
+      
+      const eventSource = new EventSource(`/execute_stream?command=${encodeURIComponent(command)}`);
+      currentEventSource = eventSource;
+      
+      // 프로세스 시작 후 Kill 버튼 상태 업데이트
+      setTimeout(() => {
+        updateKillButtonState();
+      }, 1000);
+      
+      eventSource.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          
+          switch(data.type) {
+            case 'command':
+              // 명령어는 이미 위에서 출력했으므로 건너뛰기
+              break;
+            case 'output':
+              // 덮어쓰기 패턴 감지
+              const hasEscapeF = data.content.includes('\x1b[F');
+              const hasCarriageReturn = data.content.includes('\r');
+              const isProgressPattern = /(\d+\s*\/\s*\d+\s+(events|processed|entries))|(\d+%)|(\[\s*\d+\s*\/\s*\d+\s*\])|(\d+\s+of\s+\d+)/i.test(data.content);
+              
+              // 덮어쓰기 조건: \x1b[F 포함 또는 진행률 패턴
+              const shouldOverwrite = hasEscapeF || isProgressPattern || (hasCarriageReturn && !data.content.includes('\n'));
+              
+              addToOutput(data.content, 'command-output', shouldOverwrite);
+              break;
+            case 'error':
+              addToOutput(data.content, 'command-error');
+              break;
+            case 'complete':
+              addToOutput(data.content, data.content.includes('code: 0') ? 'command-output' : 'command-error');
+              addToOutput(''); // Empty line for spacing
+              eventSource.close();
+              currentEventSource = null;
+              updateKillButtonState();
+              break;
+          }
+        } catch (e) {
+          console.error('Error parsing SSE data:', e);
+        }
+      };
+      
+      eventSource.onerror = function(event) {
+        console.error('EventSource error:', event);
+        addToOutput('Connection error - command may still be running', 'command-error');
+        addToOutput(''); // Empty line for spacing
+        eventSource.close();
+        currentEventSource = null;
+        updateKillButtonState();
+      };
+      
+      // 연결 종료 처리
+      eventSource.addEventListener('close', function() {
+        eventSource.close();
+        currentEventSource = null;
+        updateKillButtonState();
+      });
+    }
+    
+    function clearActive() {
+      document.querySelectorAll('#fileList .file-header').forEach(header => {
+        header.classList.remove('active');
+      });
+    }
+
+    function loadRootFile(filename) {
+      if (!jsrootReady) {
+        document.getElementById('status').textContent = 'JSROOT not ready yet...';
+        return;
+      }
+
+      document.getElementById('status').textContent = `Loading ${filename}...`;
+      
+      clearActive();
+      const fileItem = document.querySelector(`#fileList .file-item[data-file="${filename}"]`);
+      if (fileItem) {
+        const header = fileItem.querySelector('.file-header');
+        if (header) header.classList.add('active');
+      }
+
+      // Open ROOT file
+      JSROOT.openFile(`output/${filename}`).then(file => {
+        currentFile = file;
+        
+        if (!file) {
+          document.getElementById('status').textContent = `Error: Could not open ${filename}`;
+          return;
+        }
+
+        // Load file contents into sidebar dropdown instead of hierarchy
+        loadFileContentsToSidebar(filename, file);
+        
+            document.getElementById('status').textContent = `${filename} loaded successfully`;
+      }).catch(error => {
+        console.error('Error opening file:', error);
+        document.getElementById('status').textContent = `Error: ${error}`;
+      });
+    }
+
+    function loadFileContentsToSidebar(filename, file) {
+      // Find the file item in sidebar
+      const fileItem = document.querySelector(`[data-file="${filename}"]`);
+      if (!fileItem) return;
+
+      // Check if contents already exist
+      let contentsDiv = fileItem.nextElementSibling;
+      if (!contentsDiv || !contentsDiv.classList.contains('file-contents')) {
+        contentsDiv = document.createElement('div');
+        contentsDiv.className = 'file-contents';
+        fileItem.parentNode.insertBefore(contentsDiv, fileItem.nextSibling);
+      }
+
+      // Clear previous contents
+      contentsDiv.innerHTML = '';
+
+          if (file.fKeys) {
+            file.fKeys.forEach(key => {
+              // Filter out StreamerInfo (TList) items
+              if (key.fName === 'StreamerInfo' && key.fClassName === 'TList') {
+                return; // Skip this item
+              }
+              
+              const contentItem = document.createElement('div');
+              contentItem.className = 'content-item';
+              contentItem.textContent = `${key.fName} (${key.fClassName})`;
+              contentItem.addEventListener('click', (e) => {
+                e.stopPropagation();
+                createPlotWindow(key.fName, file);
+              });
+              contentsDiv.appendChild(contentItem);
+            });
+      } else {
+        const noContent = document.createElement('div');
+        noContent.className = 'content-item';
+        noContent.textContent = 'No plottable objects found';
+        noContent.style.fontStyle = 'italic';
+        noContent.style.color = '#666';
+        contentsDiv.appendChild(noContent);
+      }
+
+      // Expand the dropdown
+      const header = fileItem.querySelector('.file-header');
+      const icon = fileItem.querySelector('.file-dropdown-icon');
+      if (header && icon) {
+        header.classList.add('active');
+        icon.classList.add('expanded');
+        contentsDiv.classList.add('expanded');
+      }
+    }
+
+    function toggleFileDropdown(fileItem) {
+      const header = fileItem.querySelector('.file-header');
+      const icon = fileItem.querySelector('.file-dropdown-icon');
+      const contents = fileItem.nextElementSibling;
+
+      if (contents && contents.classList.contains('file-contents')) {
+        const isExpanded = contents.classList.contains('expanded');
+        
+        if (isExpanded) {
+          // Collapse
+          header.classList.remove('active');
+          icon.classList.remove('expanded');
+          contents.classList.remove('expanded');
+        } else {
+          // Expand
+          header.classList.add('active');
+          icon.classList.add('expanded');
+          contents.classList.add('expanded');
+        }
+      }
+    }
+    
+    function showProcessKillModal() {
+      const processKillModal = document.getElementById('processKillModal');
+      const processList = document.getElementById('processList');
+      const killError = document.getElementById('killError');
+      
+      processKillModal.style.display = 'flex';
+      processList.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Loading processes...</div>';
+      killError.textContent = '';
+      
+      // Fetch ./monit processes
+      fetch('/find_monit_processes')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            if (data.count === 0) {
+              processList.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No ./monit processes found</div>';
+              document.getElementById('confirmKillBtn').disabled = true;
+            } else {
+              let html = `<div style="font-weight: bold; margin-bottom: 10px; color: #333;">Found ${data.count} process(es):</div>`;
+              data.processes.forEach((proc, index) => {
+                html += `
+                  <div style="background: white; margin: 5px 0; padding: 8px; border-radius: 3px; border-left: 3px solid #dc3545;">
+                    <div style="font-weight: bold; color: #dc3545;">PID: ${proc.pid}</div>
+                    <div style="color: #666; margin-top: 3px; word-break: break-all;">${proc.command}</div>
+                  </div>
+                `;
+              });
+              processList.innerHTML = html;
+              document.getElementById('confirmKillBtn').disabled = false;
+            }
+          } else {
+            processList.innerHTML = `<div style="text-align: center; color: #dc3545; padding: 20px;">Error: ${data.message}</div>`;
+            document.getElementById('confirmKillBtn').disabled = true;
+          }
+        })
+        .catch(error => {
+          processList.innerHTML = `<div style="text-align: center; color: #dc3545; padding: 20px;">Error loading processes: ${error}</div>`;
+          document.getElementById('confirmKillBtn').disabled = true;
+        });
+    }
+    
+    function hideProcessKillModal() {
+      const processKillModal = document.getElementById('processKillModal');
+      processKillModal.style.display = 'none';
+    }
+    
+    function confirmKillAllMonit() {
+      const confirmKillBtn = document.getElementById('confirmKillBtn');
+      const killError = document.getElementById('killError');
+      
+      confirmKillBtn.disabled = true;
+      confirmKillBtn.textContent = 'Killing...';
+      killError.textContent = '';
+      
+      fetch('/kill_all_monit', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            hideProcessKillModal();
+            const message = `✅ ${data.message}`;
+            addToOutput(message, 'command-output');
+            addToOutput(''); // Empty line for spacing
+            
+            // Update kill button state if any process was terminated
+            if (data.killed_count > 0) {
+              updateKillButtonState();
+            }
+          } else {
+            killError.textContent = data.message || 'Failed to kill processes';
+          }
+        })
+        .catch(error => {
+          killError.textContent = `Error: ${error}`;
+        })
+        .finally(() => {
+          confirmKillBtn.disabled = false;
+          confirmKillBtn.textContent = 'Kill All';
+        });
+    }
+    
+    // ROOT object error handling functions
+    function reloadRootObject(windowId, objectName) {
+      const windowData = windows.get(windowId);
+      if (!windowData) return;
+      
+      const body = windowData.element.querySelector('.plot-window-body');
+      body.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">🔄 Reloading object...</div>';
+      
+      // Wait a bit before reloading (in case file is still being written)
+      setTimeout(() => {
+        loadPlotInWindow(windowId, objectName, windowData.rootFile);
+      }, 1000);
+    }
+    
+    function inspectRootObject(windowId, objectName) {
+      const windowData = windows.get(windowId);
+      if (!windowData) return;
+      
+      const body = windowData.element.querySelector('.plot-window-body');
+      body.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">🔍 Inspecting object...</div>';
+      
+      windowData.rootFile.readObject(objectName).then(obj => {
+                    if (obj) {
+          // Show detailed object information
+          const objInfo = {
+            name: objectName,
+            type: obj._typename || 'Unknown',
+            title: obj.fTitle || 'No title',
+            entries: obj.fEntries || 'N/A',
+            keys: Object.keys(obj).filter(key => !key.startsWith('_')),
+            properties: {}
+          };
+          
+          // Extract some key properties
+          Object.keys(obj).forEach(key => {
+            if (!key.startsWith('_') && obj[key] !== null && obj[key] !== undefined) {
+              const value = obj[key];
+              if (typeof value === 'object') {
+                objInfo.properties[key] = `[Object: ${value.constructor.name}]`;
+              } else {
+                objInfo.properties[key] = value;
+              }
+            }
+          });
+          
+          body.innerHTML = `
+            <div style="padding: 15px; text-align: left; font-size: 12px; overflow: auto; max-height: 300px;">
+              <h4 style="text-align: center; margin-top: 0;">🔍 Object Inspector</h4>
+              <table style="width: 100%; border-collapse: collapse; font-family: 'Courier New', monospace;">
+                <tr><td style="font-weight: bold; padding: 5px; border: 1px solid #ddd; background: #f8f9fa;">Name:</td><td style="padding: 5px; border: 1px solid #ddd;">${objInfo.name}</td></tr>
+                <tr><td style="font-weight: bold; padding: 5px; border: 1px solid #ddd; background: #f8f9fa;">Type:</td><td style="padding: 5px; border: 1px solid #ddd;">${objInfo.type}</td></tr>
+                <tr><td style="font-weight: bold; padding: 5px; border: 1px solid #ddd; background: #f8f9fa;">Title:</td><td style="padding: 5px; border: 1px solid #ddd;">${objInfo.title}</td></tr>
+                <tr><td style="font-weight: bold; padding: 5px; border: 1px solid #ddd; background: #f8f9fa;">Entries:</td><td style="padding: 5px; border: 1px solid #ddd;">${objInfo.entries}</td></tr>
+              </table>
+              
+              <h5 style="margin: 15px 0 5px 0;">Properties (${objInfo.keys.length}):</h5>
+              <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 10px; max-height: 150px; overflow: auto;">
+                <pre style="margin: 0; font-size: 10px;">${JSON.stringify(objInfo.properties, null, 2)}</pre>
+              </div>
+              
+              <div style="text-align: center; margin-top: 15px;">
+                <button onclick="tryAlternativeDrawing('${windowId}', '${objectName}')" style="margin: 5px; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                  🎨 Try Drawing Again
+                </button>
+                <button onclick="loadPlotInWindow('${windowId}', '${objectName}', windows.get('${windowId}').rootFile)" style="margin: 5px; padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                  🔄 Back to Plot
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          body.innerHTML = `
+            <div style="color: red; text-align: center; padding: 20px;">
+              <h4>❌ Object not found during inspection</h4>
+              <p>Could not load ${objectName} for inspection.</p>
+              <button onclick="loadPlotInWindow('${windowId}', '${objectName}', windows.get('${windowId}').rootFile)" style="margin-top: 10px; padding: 5px 10px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                ← Back
+              </button>
+            </div>
+          `;
+        }
+      }).catch(err => {
+        body.innerHTML = `
+          <div style="color: red; text-align: center; padding: 20px;">
+            <h4>❌ Inspection failed</h4>
+            <p><strong>Error:</strong> ${err.message || err}</p>
+            <button onclick="loadPlotInWindow('${windowId}', '${objectName}', windows.get('${windowId}').rootFile)" style="margin-top: 10px; padding: 5px 10px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer;">
+              ← Back
+            </button>
+          </div>
+        `;
+      });
+    }
+    
+    function tryAlternativeDrawing(windowId, objectName) {
+      const windowData = windows.get(windowId);
+      if (!windowData) return;
+      
+      const body = windowData.element.querySelector('.plot-window-body');
+      
+      windowData.rootFile.readObject(objectName).then(obj => {
+        if (obj) {
+          body.innerHTML = `
+            <div style="padding: 15px; text-align: center;">
+              <h4>🎨 Alternative Drawing Methods</h4>
+              <p>Choose a drawing option for <strong>${objectName}</strong> (${obj._typename || 'Unknown'})</p>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
+                <button onclick="forceDrawWithOption('${windowId}', '${objectName}', 'hist')" style="padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                  📊 Histogram (hist)
+                </button>
+                <button onclick="forceDrawWithOption('${windowId}', '${objectName}', 'colz')" style="padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                  🌈 Color Plot (colz)
+                </button>
+                <button onclick="forceDrawWithOption('${windowId}', '${objectName}', 'lego')" style="padding: 10px; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                  🧱 3D Lego (lego)
+                </button>
+                <button onclick="forceDrawWithOption('${windowId}', '${objectName}', 'surf')" style="padding: 10px; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                  🏔️ Surface (surf)
+                </button>
+                <button onclick="forceDrawWithOption('${windowId}', '${objectName}', 'box')" style="padding: 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                  📦 Box Plot (box)
+                </button>
+                <button onclick="forceDrawWithOption('${windowId}', '${objectName}', '')" style="padding: 10px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                  ⚙️ Default
+                </button>
+              </div>
+              
+              <div style="margin-top: 20px;">
+                <button onclick="loadPlotInWindow('${windowId}', '${objectName}', windows.get('${windowId}').rootFile)" style="padding: 8px 15px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                  ← Back to Auto-detect
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      }).catch(err => {
+        body.innerHTML = `
+          <div style="color: red; text-align: center; padding: 20px;">
+            <h4>❌ Could not load object for alternative drawing</h4>
+            <p><strong>Error:</strong> ${err.message || err}</p>
+          </div>
+        `;
+      });
+    }
+    
+    function forceDrawWithOption(windowId, objectName, option) {
+      const windowData = windows.get(windowId);
+      if (!windowData) return;
+      
+      const body = windowData.element.querySelector('.plot-window-body');
+      body.innerHTML = `<div style="text-align: center; padding: 20px; color: #666;">Drawing with option: ${option || 'default'}...</div>`;
+      
+      windowData.rootFile.readObject(objectName).then(obj => {
+                  if (obj) {
+          body.innerHTML = '';
+          
+          JSROOT.draw(body, obj, option).then(() => {
+            // Success! Update window title
+            const titleElement = windowData.element.querySelector('.plot-window-title');
+            if (titleElement) {
+              titleElement.textContent = `${objectName}${option ? ` (${option})` : ''}`;
+            }
+            
+            // Show success message briefly
+            const statusElement = document.getElementById('status');
+            if (statusElement) {
+              statusElement.textContent = `✅ Successfully drew ${objectName} with option: ${option || 'default'}`;
+              setTimeout(() => {
+                statusElement.textContent = 'Ready';
+              }, 3000);
+                  }
+                }).catch(err => {
+            body.innerHTML = `
+              <div style="color: red; text-align: center; padding: 20px;">
+                <h4>❌ Failed to draw with option: ${option || 'default'}</h4>
+                <p><strong>Error:</strong> ${err.message || err}</p>
+                <button onclick="tryAlternativeDrawing('${windowId}', '${objectName}')" style="margin-top: 10px; padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                  ← Try Other Options
+                </button>
+              </div>
+            `;
+          });
+        }
+      });
+    }
+    
+    // Monit Command Builder Functions
+    function updateCommandPreview() {
+      const runNumber = document.getElementById('runNumber').value || '6034';
+      const type = document.getElementById('typeSelect').value;
+      const method = document.getElementById('methodSelect').value;
+      const module = document.getElementById('moduleInput').value || 'M5';
+      const live = document.getElementById('liveCheck').checked;
+      const aux = document.getElementById('auxCheck').checked;
+      
+      let command = `./monit --RunNumber ${runNumber} --type ${type} --method ${method} --module ${module}`;
+      
+      if (aux) command += ' --AUX';
+      if (live) command += ' --LIVE';
+      
+      document.getElementById('commandPreview').textContent = command;
+    }
+    
+    function executeMonitCommand() {
+      // Check security access first
+      if (!checkCommandAccess()) {
+        addToOutput('🔒 Access denied. Please unlock first.', 'command-error');
+        return;
+      }
+      
+      const runNumber = document.getElementById('runNumber').value;
+      const type = document.getElementById('typeSelect').value;
+      const method = document.getElementById('methodSelect').value;
+      const module = document.getElementById('moduleInput').value;
+      const live = document.getElementById('liveCheck').checked;
+      const aux = document.getElementById('auxCheck').checked;
+      
+      // Validation
+      if (!runNumber) {
+        addToOutput('❌ Error: Run Number is required', 'command-error');
+        document.getElementById('runNumber').focus();
+        return;
+      }
+      
+      if (!module.trim()) {
+        addToOutput('❌ Error: Module is required', 'command-error');
+        document.getElementById('moduleInput').focus();
+        return;
+      }
+      
+      // Build command
+      let command = `./monit --RunNumber ${runNumber} --type ${type} --method ${method} --module ${module}`;
+      
+      if (aux) command += ' --AUX';
+      if (live) command += ' --LIVE';
+      
+      // Show the command being executed
+      addToOutput(`🚀 Executing monit command:`, 'command-history');
+      addToOutput(`$ ${command}`, 'command-history');
+      addToOutput(''); // Empty line for spacing
+      
+      // Execute the command
+      executeCommandStream(command);
+    }
+    
+    function setupMonitForm() {
+      // Get form elements
+      const runNumber = document.getElementById('runNumber');
+      const typeSelect = document.getElementById('typeSelect');
+      const methodSelect = document.getElementById('methodSelect');
+      const moduleInput = document.getElementById('moduleInput');
+      const liveCheck = document.getElementById('liveCheck');
+      const auxCheck = document.getElementById('auxCheck');
+      const executeBtn = document.getElementById('executeMonitBtn');
+      
+      // Add event listeners for real-time preview update
+      if (runNumber) runNumber.addEventListener('input', updateCommandPreview);
+      if (typeSelect) typeSelect.addEventListener('change', updateCommandPreview);
+      if (methodSelect) methodSelect.addEventListener('change', updateCommandPreview);
+      if (moduleInput) moduleInput.addEventListener('input', updateCommandPreview);
+      if (liveCheck) liveCheck.addEventListener('change', updateCommandPreview);
+      if (auxCheck) auxCheck.addEventListener('change', updateCommandPreview);
+      
+      // Execute button
+      if (executeBtn) executeBtn.addEventListener('click', executeMonitCommand);
+      
+      // Set default values and update preview
+      if (runNumber) runNumber.value = '6034';
+      if (moduleInput) moduleInput.value = 'M5';
+      updateCommandPreview();
+    }
+    
+    // File list management functions
+    function loadFileList(isInitialLoad = false) {
+      return fetch('/files')
+        .then(response => response.json())
+        .then(files => {
+          if (isInitialLoad) {
+            // Initial load - populate entire list
+            currentFileList = [...files];
+            populateFileList(files);
+          
+          // Auto-load first file if available
+          if (files.length > 0) {
+            loadRootFile(files[0]);
+            }
+          } else {
+            // Check for new files
+            const newFiles = files.filter(file => !currentFileList.includes(file));
+            
+            if (newFiles.length > 0) {
+              // Add new files to current list
+              currentFileList = [...files];
+              addNewFilesToList(newFiles);
+              
+              // Show notification
+              const statusElement = document.getElementById('status');
+              if (statusElement) {
+                statusElement.textContent = `📁 ${newFiles.length} new file(s) detected: ${newFiles.join(', ')}`;
+                statusElement.style.background = '#d4edda';
+                statusElement.style.color = '#155724';
+                setTimeout(() => {
+                  statusElement.textContent = 'Ready';
+                  statusElement.style.background = '#f9f9f9';
+                  statusElement.style.color = '#666';
+                }, 5000);
+              }
+            }
+            
+            // Check for removed files
+            const removedFiles = currentFileList.filter(file => !files.includes(file));
+            if (removedFiles.length > 0) {
+              currentFileList = [...files];
+              removeDeletedFilesFromList(removedFiles);
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error loading file list:', error);
+          if (isInitialLoad) {
+          document.getElementById('status').textContent = 'Error loading file list';
+          }
+        });
+    }
+    
+    function populateFileList(files) {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = ''; // Clear existing files
+      
+      files.forEach(file => {
+        createFileItem(file);
+      });
+    }
+    
+    function createFileItem(filename) {
+      const fileList = document.getElementById('fileList');
+      
+      // Create file item container
+      const fileItem = document.createElement('div');
+      fileItem.className = 'file-item';
+      fileItem.setAttribute('data-file', filename);
+      
+      // Create file header (clickable)
+      const fileHeader = document.createElement('div');
+      fileHeader.className = 'file-header';
+      fileHeader.innerHTML = `
+        <span>${filename}</span>
+        <span class="file-dropdown-icon">▶</span>
+      `;
+      
+      // Add click handler for dropdown toggle
+      fileHeader.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Load file if not loaded yet
+        if (!fileItem.nextElementSibling || !fileItem.nextElementSibling.classList.contains('file-contents')) {
+          loadRootFile(filename);
+        } else {
+          toggleFileDropdown(fileItem);
+        }
+      });
+      
+      fileItem.appendChild(fileHeader);
+      fileList.appendChild(fileItem);
+    }
+    
+    function addNewFilesToList(newFiles) {
+      newFiles.forEach(filename => {
+        createFileItem(filename);
+        
+        // Add visual highlight for new files
+        const fileItem = document.querySelector(`[data-file="${filename}"]`);
+        if (fileItem) {
+          const header = fileItem.querySelector('.file-header');
+          header.style.background = '#d4edda';
+          header.style.border = '2px solid #28a745';
+          header.style.animation = 'pulse 2s';
+          
+          // Remove highlight after a few seconds
+          setTimeout(() => {
+            header.style.background = '';
+            header.style.border = '';
+            header.style.animation = '';
+          }, 5000);
+        }
+      });
+    }
+    
+    function removeDeletedFilesFromList(removedFiles) {
+      removedFiles.forEach(filename => {
+        const fileItem = document.querySelector(`[data-file="${filename}"]`);
+        if (fileItem) {
+          // Fade out animation
+          fileItem.style.opacity = '0.3';
+          fileItem.style.transition = 'opacity 0.5s ease';
+          
+          setTimeout(() => {
+            // Remove the file item and its contents
+            const contents = fileItem.nextElementSibling;
+            if (contents && contents.classList.contains('file-contents')) {
+              contents.remove();
+            }
+            fileItem.remove();
+          }, 500);
+        }
+      });
+    }
+    
+    function startFileListAutoRefresh() {
+      // Refresh every 3 seconds
+      fileRefreshInterval = setInterval(() => {
+        loadFileList(false);
+      }, 3000);
+    }
+    
+    function stopFileListAutoRefresh() {
+      if (fileRefreshInterval) {
+        clearInterval(fileRefreshInterval);
+        fileRefreshInterval = null;
+      }
+    }
+    
+    // Wait for JSROOT to be fully loaded
+    function waitForJSROOT() {
+      return new Promise((resolve) => {
+        if (window.JSROOT && window.JSROOT.openFile) {
+          jsrootReady = true;
+          resolve();
+        } else {
+          setTimeout(() => waitForJSROOT().then(resolve), 100);
+        }
+      });
+    }
+
+    // Load file list on page load
+    waitForJSROOT().then(() => {
+      // Initialize all UI components after DOM is ready
+      
+      // Setup tab switching functionality
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetPanel = tab.getAttribute('data-panel');
+          
+          // Command Interface 탭 클릭시 접근 권한 확인
+          if (targetPanel === 'commandPanel' && !checkCommandAccess()) {
+            pendingTabSwitch = targetPanel;
+            showSecurityModal();
+            return;
+          }
+          
+          switchToPanel(targetPanel);
+                  });
+                });
+      
+      // Setup security modal event handlers
+      const verifyBtn = document.getElementById('verifyBtn');
+      const cancelBtn = document.getElementById('cancelBtn');
+      const securityCode = document.getElementById('securityCode');
+      const securityModal = document.getElementById('securityModal');
+      
+      if (verifyBtn) verifyBtn.addEventListener('click', verifySecurityCode);
+      if (cancelBtn) cancelBtn.addEventListener('click', hideSecurityModal);
+      
+      // Setup process kill modal event handlers
+      const confirmKillBtn = document.getElementById('confirmKillBtn');
+      const cancelKillBtn = document.getElementById('cancelKillBtn');
+      const processKillModal = document.getElementById('processKillModal');
+      
+      if (confirmKillBtn) confirmKillBtn.addEventListener('click', confirmKillAllMonit);
+      if (cancelKillBtn) cancelKillBtn.addEventListener('click', hideProcessKillModal);
+      
+      // Enter key support for security code input
+      if (securityCode) {
+        securityCode.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            verifySecurityCode();
+          }
+        });
+      }
+      
+      // ESC key to close modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (securityModal && securityModal.style.display === 'flex') {
+            hideSecurityModal();
+          }
+          if (processKillModal && processKillModal.style.display === 'flex') {
+            hideProcessKillModal();
+          }
+        }
+      });
+      
+      // Click outside modal to close
+      if (securityModal) {
+        securityModal.addEventListener('click', (e) => {
+          if (e.target === securityModal) {
+            hideSecurityModal();
+          }
+        });
+      }
+      
+      if (processKillModal) {
+        processKillModal.addEventListener('click', (e) => {
+          if (e.target === processKillModal) {
+            hideProcessKillModal();
+          }
+        });
+      }
+      
+      // Setup command interface event handlers
+      const commandText = document.getElementById('commandText');
+      const killBtn = document.getElementById('killBtn');
+      const killAllMonitBtn = document.getElementById('killAllMonitBtn');
+      
+      if (killBtn) {
+        killBtn.addEventListener('click', () => {
+          killProcess();
+        });
+      }
+
+      if (killAllMonitBtn) {
+        killAllMonitBtn.addEventListener('click', () => {
+          showProcessKillModal();
+        });
+      }
+      
+      if (commandText) {
+        commandText.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const command = commandText.value.trim();
+            if (command) {
+              executeCommandStream(command);
+              commandText.value = '';
+            }
+          }
+        });
+      }
+
+      
+      // Load ROOT files with dropdown structure and start auto-refresh
+      loadFileList(true).then(() => {
+        // Start auto-refresh after initial load
+        startFileListAutoRefresh();
+      });
+      
+      // 페이지 로드시 보안 상태 초기화
+      updateLockState();
+      
+      // 페이지 로드시 Kill 버튼 상태 초기화
+      updateKillButtonState();
+      
+      // Setup monit command builder form
+      setupMonitForm();
+      
+      // 주기적으로 프로세스 상태 확인 (5초마다)
+      setInterval(() => {
+        updateKillButtonState();
+      }, 5000);
+      
+      // Clean up intervals when page is unloaded
+      window.addEventListener('beforeunload', () => {
+        stopFileListAutoRefresh();
+      });
+    });
+    
+    function refreshPlotInWindow(windowId) {
+      const windowData = windows.get(windowId);
+      if (!windowData) return;
+      
+      const body = windowData.element.querySelector('.plot-window-body');
+      const currentContent = body.innerHTML;
+      
+      // Only refresh if there's already a plot (not an error message or loading state)
+      if (currentContent.includes('Loading plot...') || 
+          currentContent.includes('Error') || 
+          currentContent.includes('❌') || 
+          currentContent.includes('⚠️') ||
+          currentContent.includes('🔍')) {
+        return; // Don't refresh error states or loading states
+      }
+      
+      // Check if there's actually a JSROOT plot in the body
+      const hasJSROOTContent = body.querySelector('svg') || body.querySelector('canvas') || body.querySelector('.jsroot');
+      if (!hasJSROOTContent) {
+        return; // No JSROOT content to refresh
+      }
+      
+      // Clear and redraw the plot
+      body.innerHTML = '<div style="text-align: center; padding: 20px; color: #666; font-size: 12px;">🔄 Refreshing plot...</div>';
+      
+      setTimeout(() => {
+        windowData.rootFile.readObject(windowData.objectName).then(obj => {
+          if (obj) {
+            body.innerHTML = '';
+            
+            // Try to use the same drawing option that was successful before
+            const titleElement = windowData.element.querySelector('.plot-window-title');
+            const currentTitle = titleElement ? titleElement.textContent : '';
+            let drawOption = 'hist'; // default
+            
+            // Extract drawing option from title if it exists
+            const optionMatch = currentTitle.match(/\((\w+)\)$/);
+            if (optionMatch) {
+              drawOption = optionMatch[1];
+            }
+            
+            JSROOT.draw(body, obj, drawOption).then(() => {
+              // Successfully refreshed
+            }).catch(err => {
+              // If the previous option fails, try default
+              body.innerHTML = '';
+              JSROOT.draw(body, obj, 'hist').catch(() => {
+                body.innerHTML = `<div style="color: orange; text-align: center; padding: 20px; font-size: 12px;">⚠️ Could not refresh plot</div>`;
+              });
+            });
+          }
+        }).catch(err => {
+          body.innerHTML = `<div style="color: orange; text-align: center; padding: 20px; font-size: 12px;">⚠️ Could not refresh plot</div>`;
+        });
+      }, 50);
+    }
+    
+    // System Info Functions
+    function updateSystemInfo() {
+      updateCurrentTime();
+      updateMemoryInfo();
+    }
+    
+    function updateCurrentTime() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+      const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      
+      const month = months[now.getMonth()];
+      const day = now.getDate();
+      const weekday = weekdays[now.getDay()];
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      const formatted = `${year} ${month} ${day} ${weekday} ${hours}:${minutes}`;
+      document.getElementById('currentTime').textContent = formatted;
+    }
+    
+    function updateMemoryInfo() {
+      if ('memory' in performance) {
+        const memory = performance.memory;
+        const usedMB = (memory.usedJSHeapSize / 1024 / 1024).toFixed(1);
+        const totalMB = (memory.totalJSHeapSize / 1024 / 1024).toFixed(1);
+        document.getElementById('browserMemory').textContent = `Browser: ${usedMB}MB / ${totalMB}MB`;
+      } else {
+        // Fallback for browsers that don't support performance.memory
+        document.getElementById('browserMemory').textContent = 'Browser Memory: N/A';
+      }
+    }
+    
+    async function updateServerInfo() {
+      try {
+        const response = await fetch('/api/system-info');
+        const data = await response.json();
+        
+        if (data.error) {
+          document.getElementById('serverInfo').textContent = 'Server: N/A';
+          return;
+        }
+        
+        let serverText = '';
+        if (data.memory.total !== 'N/A') {
+          serverText = `Server: ${data.memory.used}GB / ${data.memory.total}GB`;
+          if (data.cpu.percent !== 'N/A') {
+            serverText += ` | CPU: ${data.cpu.percent}%`;
+          }
+        } else {
+          serverText = `Server Memory: ${data.memory.used}GB`;
+        }
+        
+        document.getElementById('serverInfo').textContent = serverText;
+      } catch (error) {
+        document.getElementById('serverInfo').textContent = 'Server: Connection Error';
+      }
+    }
+    
+    // Initialize and start updating system info
+    updateSystemInfo();
+    updateServerInfo(); // Initial server info load
+    setInterval(updateSystemInfo, 1000); // Update time and browser memory every second
+    setInterval(updateServerInfo, 5000); // Update server info every 5 seconds
+  </script>
+</body>
+</html> 

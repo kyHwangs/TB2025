@@ -31,7 +31,7 @@ class TBaux
 {
 public:
   TBaux() = default;
-  TBaux(const YAML::Node fNodePlot_, int fRunNum_, bool fPlotting_, bool fLive_, TButility fUtility_);
+  TBaux(const YAML::Node fNodePlot_, int fRunNum_, bool fPlotting_, bool fLive_, bool fDraw_, TButility fUtility_);
   ~TBaux() {}
 
   void init();
@@ -85,6 +85,7 @@ private:
   int fRunNum;
   bool fPlotting;
   bool fLive;
+  bool fDraw;
   TButility fUtility;
 
   TApplication* fApp;

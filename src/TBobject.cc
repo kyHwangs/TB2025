@@ -59,6 +59,10 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
 
     if (fArgv[i] == "--LIVE")
       AddVariable("LIVE", true);
+
+    if (fArgv[i] == "--DRAW")
+      AddVariable("DRAW", true);
+
   }
 }
 
@@ -86,7 +90,7 @@ bool ObjectCollection::Help() {
     std::cout << "    eg) ./monit --RunNumver 9119 --type single --method IntADC" << std::endl;
     std::cout << ANSI.BOLD << "------------------------------------------------------" << ANSI.END << std::endl;
 
-    std::cout << ANSI.BOLD + ANSI.YELLOW + "  Mandatory options for '--method single'" + ANSI.END << std::endl;
+    std::cout << ANSI.BOLD + ANSI.YELLOW + "  Mandatory options for '--type single'" + ANSI.END << std::endl;
     std::cout << ANSI.BOLD + "    --module " + ANSI.YELLOW + "module name ..." + ANSI.END << std::endl;
     std::cout << "    eg) ./monit --RunNumver 9119 --type single --method IntADC --module M1T1_S M1T1_C M1T2_S M1T2_C" << std::endl;
     std::cout << ANSI.BOLD << "------------------------------------------------------" << ANSI.END << std::endl;

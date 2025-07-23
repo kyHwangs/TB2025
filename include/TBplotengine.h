@@ -30,7 +30,7 @@ class TBplotengine
 {
 public:
   TBplotengine() = default;
-  TBplotengine(const YAML::Node fNodePlot_, int fRunNum_, bool fLive_, TButility fUtility_);
+  TBplotengine(const YAML::Node fNodePlot_, int fRunNum_, bool fLive_, bool fDraw_, TButility fUtility_);
   ~TBplotengine() {}
 
   enum CalcInfo
@@ -131,6 +131,7 @@ private:
   int fRunNum;
   TButility fUtility;
 
+  bool fDraw;
   bool fIsFirst;
   bool fLive;
   bool fUsingAUX;
