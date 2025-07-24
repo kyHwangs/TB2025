@@ -8,7 +8,7 @@ import json
 import fcntl
 import select
 import threading
-from flask import Flask, request, Response, jsonify, send_from_directory
+from flask import Flask, request, Response, jsonify, send_from_directory, send_file
 
 # 현재 실행되는 파이썬 파일의 디렉토리를 기준으로 절대경로 생성
 BASE_DIR = "/Users/khwang/scratch/TB2025/dev_250707/TB2025/monit"
@@ -365,17 +365,47 @@ def send_file_with_range_support(file_path):
                                'Accept-Ranges': 'bytes'})
 
 @app.route('/output/<path:filename>')
-def serve_root_file(filename):
-    file_path = os.path.join(ROOT_DIR, filename)
-    if os.path.exists(file_path):
-        return send_file_with_range_support(file_path)
-    else:
-        return "File not found", 404
+def serve_output_file(filename):
+    try:
+        file_path = os.path.join('output', filename)
+        if not os.path.exists(file_path):
+            return f"File {filename} not found", 404
+            
+        # Add cache control headers for ROOT files to ensure fresh content
+        response = send_from_directory('output', filename)
+        if filename.endswith('.root'):
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+            
+        return response
+    except Exception as e:
+        return f"Error serving file {filename}: {str(e)}", 500
 
 @app.route('/files')
 def list_root_files():
-    files = [f for f in os.listdir(ROOT_DIR) if f.endswith(".root")]
-    return jsonify(files)
+    try:
+        files_info = []
+        for f in os.listdir(ROOT_DIR):
+            if f.endswith(".root"):
+                file_path = os.path.join(ROOT_DIR, f)
+                if os.path.exists(file_path):
+                    # Get file creation/modification time
+                    stat = os.stat(file_path)
+                    # Use modification time (mtime) as it's more reliable than creation time
+                    modification_time = stat.st_mtime
+                    files_info.append({
+                        'name': f,
+                        'mtime': modification_time,
+                        'size': stat.st_size
+                    })
+        
+        # Sort by modification time (most recent first)
+        files_info.sort(key=lambda x: x['mtime'], reverse=True)
+        
+        return jsonify(files_info)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # 정적 파일들을 서빙하는 라우트 추가
 @app.route('/<path:filename>')
@@ -1027,6 +1057,17 @@ def get_system_info():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/DRC_DQM_manual.pdf')
+def serve_dqm_manual():
+    try:
+        pdf_path = os.path.join(os.path.dirname(__file__), 'DRC_DQM_manual.pdf')
+        if os.path.exists(pdf_path):
+            return send_file(pdf_path, mimetype='application/pdf', as_attachment=False)
+        else:
+            return "DQM Manual PDF not found. Please ensure DRC_DQM_manual.pdf is in the monit directory.", 404
+    except Exception as e:
+        return f"Error serving DQM manual: {str(e)}", 500
 
 if __name__ == '__main__':
     print(f"✅ Server running on http://localhost:8000")

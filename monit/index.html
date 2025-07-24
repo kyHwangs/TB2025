@@ -12,7 +12,7 @@
       height: 100vh;
     }
     #sidebar {
-      width: 338px;
+      width: 406px;
       background: #f4f4f4;
       border-right: 1px solid #ccc;
       overflow-y: auto;
@@ -135,25 +135,40 @@
     }
     
     .file-header {
-      padding: 8px 12px;
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 4px;
+      padding: 12px 15px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
       cursor: pointer;
+      margin-bottom: 5px;
+      transition: all 0.2s ease;
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+    
+    .file-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .file-refresh-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      opacity: 0.8;
       transition: all 0.2s ease;
     }
     
-    .file-header:hover {
-      background: #e9ecef;
-    }
-    
-    .file-header.active {
-      background: #4285f4;
-      color: white;
-      border-color: #4285f4;
+    .file-refresh-btn:hover {
+      opacity: 1;
+      background: #218838;
+      transform: scale(1.1);
     }
     
     .file-dropdown-icon {
@@ -416,8 +431,8 @@
       word-wrap: break-word;
       overflow-wrap: break-word;
       word-break: break-word;
-      height: 780px;
-      max-height: 780px;
+      height: 760px;
+      max-height: 760px;
       max-width: 100%;
       box-sizing: border-box;
       line-height: 1.15;
@@ -862,6 +877,183 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
+    .file-header:hover {
+      background: #f8f9fa;
+      border-color: #d0d7de;
+    }
+    
+    .file-header.active {
+      background: #4285f4;
+      color: white;
+      border-color: #4285f4;
+    }
+    
+    .file-header.active .file-refresh-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    
+    .file-header.active .file-refresh-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .file-main-info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 4px;
+    }
+    
+    .file-name {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .file-metadata {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: #666;
+    }
+    
+    .file-size {
+      font-weight: 500;
+    }
+    
+    .file-time {
+      color: #888;
+    }
+    
+    .file-item.new-file {
+      animation: newFileHighlight 4s ease-out;
+    }
+    
+    @keyframes newFileHighlight {
+      0% {
+        background: #d4edda;
+        border-color: #28a745;
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+      }
+      15% {
+        transform: scale(1);
+      }
+      30% {
+        background: #d4edda;
+        border-color: #28a745;
+      }
+      100% {
+        background: transparent;
+        border-color: #e0e0e0;
+        transform: scale(1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+    }
+    
+    .file-header.active .file-name {
+      color: white;
+    }
+    
+    .file-header.active .file-metadata {
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    /* DQM Manual Panel Styles */
+    .dqm-manual-content {
+      padding: 15px;
+      width: 100%;
+      height: calc(100vh - 60px);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    
+    .emergency-contact {
+      background: #fff5f5;
+      border: 2px solid #e53e3e;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(229, 62, 62, 0.15);
+    }
+    
+    .emergency-contact h3 {
+      color: #e53e3e;
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .emergency-contact p {
+      color: #333;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 10px 0 15px 0;
+    }
+    
+    .contact-numbers {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .contact-numbers span {
+      background: #e53e3e;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 16px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(229, 62, 62, 0.3);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .contact-numbers span:hover {
+      background: #c53030;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(229, 62, 62, 0.4);
+    }
+    
+    .pdf-viewer-container {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      height: calc(100vh - 320px);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    
+    .pdf-viewer-container h3 {
+      color: #333;
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #4285f4;
+    }
+    
+    .pdf-viewer {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 390px);
+      overflow: hidden;
+    }
+    
+    .pdf-viewer iframe {
+      width: calc(100% - 2px);
+      height: calc(100vh - 420px);
+      max-height: calc(100vh - 420px);
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f9f9f9;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
@@ -888,10 +1080,11 @@
   <div id="main">
     <div id="tabBar">
       <div class="tabs-wrapper">
-        <div class="tab active" data-panel="rootPanel">ROOT Files</div>
+        <div class="tab active" data-panel="rootPanel">DQM Viewer</div>
         <div class="tab" data-panel="commandPanel">
           <span id="lockIcon">🔒</span> Command Interface
         </div>
+        <div class="tab" data-panel="dqmManualPanel">📋 DQM Manual</div>
       </div>
       
       <!-- System Info Panel -->
@@ -966,7 +1159,7 @@ Type a command and press Enter to execute.
           <div class="form-row">
             <div class="form-group">
               <label for="runNumber">Run #:</label>
-              <input type="number" id="runNumber" placeholder="6034" min="1" max="99999">
+              <input type="number" id="runNumber" placeholder="99999" min="1" max="99999">
             </div>
             
             <div class="form-group">
@@ -983,6 +1176,9 @@ Type a command and press Enter to execute.
               <select id="methodSelect">
                 <option value="IntADC" selected>IntADC</option>
                 <option value="PeakADC">PeakADC</option>
+                <option value="Avg">Avg</option>
+                <option value="Overlay">Overlay</option>
+
               </select>
             </div>
           </div>
@@ -990,7 +1186,7 @@ Type a command and press Enter to execute.
           <div class="form-row">
             <div class="form-group">
               <label for="moduleInput">Module:</label>
-              <input type="text" id="moduleInput" placeholder="M5 (or M1-T1-S PS MC M2-T4-S for multiple)">
+              <input type="text" id="moduleInput" placeholder="single channel name (e.g. M1-T1-S) for --type single, module name (e.g. M5) for --type module, Generic, MCPPMT for --type heatmap">
             </div>
           </div>
           
@@ -1021,6 +1217,35 @@ Type a command and press Enter to execute.
           <div class="command-preview">
             <label>Generated Command:</label>
             <div id="commandPreview" class="preview-text">./monit --RunNumber 6034 --type module --method IntADC --module M5</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- DQM Manual Panel -->
+      <div id="dqmManualPanel" class="panel">
+        <div class="dqm-manual-content">
+          <div class="emergency-contact">
+            <h3>⚠️ TROUBLE SHOOTING</h3>
+            <p>Emergency Contact Numbers:</p>
+            <div class="contact-numbers">
+              <span>📞 +82-10-2415-4529</span>
+              <span>📞 +33-782977584</span>
+              <span>📞 CERN Phone: 69968</span>
+            </div>
+          </div>
+          
+          <div class="pdf-viewer-container">
+            <h3>📋 DRC DQM Manual</h3>
+            <div id="pdfViewer" class="pdf-viewer">
+              <iframe 
+                src="DRC_DQM_manual.pdf" 
+                type="application/pdf"
+                width="100%" 
+                height="800px"
+                style="border: 1px solid #ddd; border-radius: 4px;">
+                <p>Your browser does not support PDF viewing. <a href="DRC_DQM_manual.pdf" target="_blank">Download the PDF</a> instead.</p>
+              </iframe>
+            </div>
           </div>
         </div>
       </div>
@@ -1193,7 +1418,8 @@ Type a command and press Enter to execute.
       windows.set(windowId, {
         element: windowElement,
         objectName: objectName,
-        rootFile: rootFile
+        rootFile: rootFile,
+        filename: currentFileName
       });
       
       // Load and draw the plot
@@ -1242,7 +1468,7 @@ Type a command and press Enter to execute.
       }
     }
     
-    function loadPlotInWindow(windowId, objectName, rootFile) {
+    function loadPlotInWindow(windowId, objectName, rootFile, forceReload = false) {
       const windowData = windows.get(windowId);
       if (!windowData) return;
       
@@ -1250,6 +1476,30 @@ Type a command and press Enter to execute.
       
       // Show loading state
       body.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Loading plot...</div>';
+      
+      // If forceReload is true, try to reload the file first
+      if (forceReload && windowData.filename) {
+        const timestamp = Date.now();
+        const fileUrl = `output/${windowData.filename}?t=${timestamp}`;
+        
+        JSROOT.openFile(fileUrl).then(newFile => {
+          if (newFile) {
+            windowData.rootFile = newFile;
+            windows.set(windowId, windowData);
+            loadPlotFromFile(windowId, objectName, newFile, body);
+          } else {
+            loadPlotFromFile(windowId, objectName, rootFile, body);
+          }
+        }).catch(() => {
+          loadPlotFromFile(windowId, objectName, rootFile, body);
+        });
+      } else {
+        loadPlotFromFile(windowId, objectName, rootFile, body);
+      }
+    }
+    
+    function loadPlotFromFile(windowId, objectName, rootFile, body) {
+      const windowData = windows.get(windowId);
       
       rootFile.readObject(objectName).then(obj => {
         if (obj) {
@@ -1270,13 +1520,19 @@ Type a command and press Enter to execute.
           
           function tryDrawWithOption() {
             if (optionIndex >= drawOptions.length) {
-              // All options failed, show detailed error
+              // All options failed, show detailed error with refresh option
               body.innerHTML = `
                 <div style="color: red; text-align: center; padding: 20px;">
                   <h4>❌ Failed to draw object</h4>
                   <p><strong>Object:</strong> ${objectName}</p>
                   <p><strong>Type:</strong> ${obj._typename || 'Unknown'}</p>
                   <p><strong>Error:</strong> All drawing options failed</p>
+                  <p style="color: #666; font-size: 12px; margin-top: 10px;">
+                    This might be caused by an updated ROOT file. Try refreshing the plot.
+                  </p>
+                  <button onclick="refreshPlotWindow('${windowId}')" style="margin: 5px; padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    🔄 Refresh Plot
+                  </button>
                   <details style="margin-top: 10px; text-align: left;">
                     <summary style="cursor: pointer; font-weight: bold;">Object Details</summary>
                     <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; margin-top: 5px; font-size: 11px; overflow: auto;">${JSON.stringify(obj, null, 2).substring(0, 1000)}${JSON.stringify(obj, null, 2).length > 1000 ? '...' : ''}</pre>
@@ -1292,10 +1548,15 @@ Type a command and press Enter to execute.
             const option = drawOptions[optionIndex];
             
             JSROOT.draw(body, obj, option).then(() => {
-              // Success! Update window title with drawing option info
+              // Success! Update window title with drawing option info and add refresh button
               const titleElement = windowData.element.querySelector('.plot-window-title');
-              if (titleElement && option) {
-                titleElement.textContent = `${objectName} (${option})`;
+              if (titleElement) {
+                titleElement.innerHTML = `
+                  <span>${objectName}${option ? ` (${option})` : ''}</span>
+                  <button onclick="refreshPlotWindow('${windowId}')" style="margin-left: 10px; padding: 2px 6px; font-size: 10px; background: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;" title="Refresh plot">
+                    🔄
+                  </button>
+                `;
               }
             }).catch(err => {
               // This option failed, try next one
@@ -1766,8 +2027,11 @@ Type a command and press Enter to execute.
         if (header) header.classList.add('active');
       }
 
-      // Open ROOT file
-      JSROOT.openFile(`output/${filename}`).then(file => {
+      // Open ROOT file with cache busting
+      const timestamp = Date.now();
+      const fileUrl = `output/${filename}?t=${timestamp}`;
+      
+      JSROOT.openFile(fileUrl).then(file => {
         currentFile = file;
         
         if (!file) {
@@ -1778,7 +2042,7 @@ Type a command and press Enter to execute.
         // Load file contents into sidebar dropdown instead of hierarchy
         loadFileContentsToSidebar(filename, file);
         
-            document.getElementById('status').textContent = `${filename} loaded successfully`;
+        document.getElementById('status').textContent = `${filename} loaded successfully (updated: ${new Date().toLocaleTimeString()})`;
       }).catch(error => {
         console.error('Error opening file:', error);
         document.getElementById('status').textContent = `Error: ${error}`;
@@ -1833,6 +2097,18 @@ Type a command and press Enter to execute.
         header.classList.add('active');
         icon.classList.add('expanded');
         contentsDiv.classList.add('expanded');
+      }
+    }
+
+    function toggleFileContents(filename) {
+      const fileItem = document.querySelector(`[data-file="${filename}"]`);
+      if (!fileItem) return;
+      
+      // Load file if not loaded yet
+      if (!fileItem.nextElementSibling || !fileItem.nextElementSibling.classList.contains('file-contents')) {
+        loadRootFile(filename);
+      } else {
+        toggleFileDropdown(fileItem);
       }
     }
 
@@ -2215,11 +2491,14 @@ Type a command and press Enter to execute.
     function loadFileList(isInitialLoad = false) {
       return fetch('/files')
         .then(response => response.json())
-        .then(files => {
+        .then(fileInfos => {
+          // Extract filenames from file info objects for compatibility
+          const files = fileInfos.map(fileInfo => fileInfo.name);
+          
           if (isInitialLoad) {
             // Initial load - populate entire list
             currentFileList = [...files];
-            populateFileList(files);
+            populateFileList(fileInfos);
           
           // Auto-load first file if available
           if (files.length > 0) {
@@ -2230,9 +2509,13 @@ Type a command and press Enter to execute.
             const newFiles = files.filter(file => !currentFileList.includes(file));
             
             if (newFiles.length > 0) {
-              // Add new files to current list
               currentFileList = [...files];
-              addNewFilesToList(newFiles);
+              
+              // Add new files to list with highlight
+              newFiles.forEach(filename => {
+                const newFileInfo = fileInfos.find(info => info.name === filename);
+                createFileItem(newFileInfo, true);
+              });
               
               // Show notification
               const statusElement = document.getElementById('status');
@@ -2264,29 +2547,67 @@ Type a command and press Enter to execute.
         });
     }
     
-    function populateFileList(files) {
+    function populateFileList(fileInfos) {
       const fileList = document.getElementById('fileList');
       fileList.innerHTML = ''; // Clear existing files
       
-      files.forEach(file => {
-        createFileItem(file);
+      fileInfos.forEach(fileInfo => {
+        createFileItem(fileInfo);
       });
     }
     
-    function createFileItem(filename) {
+    function createFileItem(fileInfo, isNew = false) {
       const fileList = document.getElementById('fileList');
+      const filename = fileInfo.name || fileInfo; // Handle both old string format and new object format
       
       // Create file item container
       const fileItem = document.createElement('div');
       fileItem.className = 'file-item';
+      if (isNew) fileItem.classList.add('new-file');
       fileItem.setAttribute('data-file', filename);
+      
+      // Format file size
+      const formatFileSize = (bytes) => {
+        if (bytes < 1024) return bytes + ' B';
+        else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        else return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      };
+      
+      // Format modification time
+      const formatTime = (timestamp) => {
+        const date = new Date(timestamp * 1000);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        return date.toLocaleDateString();
+      };
       
       // Create file header (clickable)
       const fileHeader = document.createElement('div');
       fileHeader.className = 'file-header';
+      
+      const fileInfoText = fileInfo.mtime ? 
+        `<div class="file-metadata">
+          <span class="file-size">${formatFileSize(fileInfo.size)}</span>
+          <span class="file-time">${formatTime(fileInfo.mtime)}</span>
+        </div>` : '';
+      
       fileHeader.innerHTML = `
-        <span>${filename}</span>
-        <span class="file-dropdown-icon">▶</span>
+        <div class="file-main-info">
+          <span class="file-name">${filename}</span>
+          ${fileInfoText}
+        </div>
+        <div class="file-controls">
+          <button class="file-refresh-btn" onclick="event.stopPropagation(); refreshRootFile('${filename}')" title="Refresh file contents">🔄</button>
+          <span class="file-dropdown-icon">▶</span>
+        </div>
       `;
       
       // Add click handler for dropdown toggle
@@ -2294,39 +2615,21 @@ Type a command and press Enter to execute.
         e.preventDefault();
         e.stopPropagation();
         
-        // Load file if not loaded yet
-        if (!fileItem.nextElementSibling || !fileItem.nextElementSibling.classList.contains('file-contents')) {
-          loadRootFile(filename);
-        } else {
-          toggleFileDropdown(fileItem);
-        }
+        toggleFileContents(filename);
       });
       
       fileItem.appendChild(fileHeader);
-      fileList.appendChild(fileItem);
+      
+      if (isNew) {
+        // Add new files at the top of the list
+        fileList.insertBefore(fileItem, fileList.firstChild);
+      } else {
+        // Add regular files at the bottom (existing behavior)
+        fileList.appendChild(fileItem);
+      }
     }
     
-    function addNewFilesToList(newFiles) {
-      newFiles.forEach(filename => {
-        createFileItem(filename);
-        
-        // Add visual highlight for new files
-        const fileItem = document.querySelector(`[data-file="${filename}"]`);
-        if (fileItem) {
-          const header = fileItem.querySelector('.file-header');
-          header.style.background = '#d4edda';
-          header.style.border = '2px solid #28a745';
-          header.style.animation = 'pulse 2s';
-          
-          // Remove highlight after a few seconds
-          setTimeout(() => {
-            header.style.background = '';
-            header.style.border = '';
-            header.style.animation = '';
-          }, 5000);
-        }
-      });
-    }
+
     
     function removeDeletedFilesFromList(removedFiles) {
       removedFiles.forEach(filename => {
@@ -2377,6 +2680,9 @@ Type a command and press Enter to execute.
     // Load file list on page load
     waitForJSROOT().then(() => {
       // Initialize all UI components after DOM is ready
+      
+      // Initialize contact number click handlers
+      initializeContactHandlers();
       
       // Setup tab switching functionality
       document.querySelectorAll('.tab').forEach(tab => {
@@ -2629,6 +2935,119 @@ Type a command and press Enter to execute.
     updateServerInfo(); // Initial server info load
     setInterval(updateSystemInfo, 1000); // Update time and browser memory every second
     setInterval(updateServerInfo, 5000); // Update server info every 5 seconds
+
+    function loadFileContents(filename) {
+      setActiveFile(filename);
+      currentFileName = filename; // Store current filename for plot refreshing
+
+      // Open ROOT file with cache busting
+      const timestamp = Date.now();
+      const fileUrl = `output/${filename}?t=${timestamp}`;
+      
+      JSROOT.openFile(fileUrl).then(file => {
+        currentFile = file;
+        
+        if (!file) {
+          document.getElementById('status').textContent = `Error: Could not open ${filename}`;
+          return;
+        }
+
+        // Load file contents into sidebar dropdown instead of hierarchy
+        loadFileContentsToSidebar(filename, file);
+        
+        document.getElementById('status').textContent = `${filename} loaded successfully (updated: ${new Date().toLocaleTimeString()})`;
+      }).catch(error => {
+        console.error('Error opening file:', error);
+        document.getElementById('status').textContent = `Error: ${error}`;
+      });
+    }
+
+    // Function to refresh a plot window with updated data
+    function refreshPlotWindow(windowId) {
+      const windowData = windows.get(windowId);
+      if (!windowData) return;
+      
+      loadPlotInWindow(windowId, windowData.objectName, windowData.rootFile, true);
+    }
+    
+    // Copy phone number to clipboard
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text.replace('📞 ', '')).then(() => {
+        // Show notification
+        const statusElement = document.getElementById('status');
+        const originalText = statusElement.textContent;
+        const originalBg = statusElement.style.background;
+        const originalColor = statusElement.style.color;
+        
+        statusElement.textContent = `📋 Copied: ${text}`;
+        statusElement.style.background = '#d4edda';
+        statusElement.style.color = '#155724';
+        
+        setTimeout(() => {
+          statusElement.textContent = originalText;
+          statusElement.style.background = originalBg;
+          statusElement.style.color = originalColor;
+        }, 3000);
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+    
+    // Initialize contact number click handlers
+    function initializeContactHandlers() {
+      const contactNumbers = document.querySelectorAll('.contact-numbers span');
+      contactNumbers.forEach(span => {
+        span.addEventListener('click', () => {
+          copyToClipboard(span.textContent);
+        });
+      });
+    }
+    
+    // Store current filename for file operations
+    let currentFileName = null;
+
+    // Function to refresh a specific ROOT file
+    function refreshRootFile(filename) {
+      // Find and clear existing file contents
+      const fileItem = document.querySelector(`[data-file="${filename}"]`);
+      if (fileItem) {
+        const contentsDiv = fileItem.nextElementSibling;
+        if (contentsDiv && contentsDiv.classList.contains('file-contents')) {
+          contentsDiv.remove();
+        }
+      }
+      
+      // Reload the file with cache busting
+      currentFileName = filename;
+      const timestamp = Date.now();
+      const fileUrl = `output/${filename}?t=${timestamp}`;
+      
+      document.getElementById('status').textContent = `Refreshing ${filename}...`;
+      
+      JSROOT.openFile(fileUrl).then(file => {
+        if (!file) {
+          document.getElementById('status').textContent = `Error: Could not refresh ${filename}`;
+          return;
+        }
+        
+        currentFile = file;
+        loadFileContentsToSidebar(filename, file);
+        document.getElementById('status').textContent = `${filename} refreshed successfully (${new Date().toLocaleTimeString()})`;
+        
+        // Also refresh any open plot windows from this file
+        windows.forEach((windowData, windowId) => {
+          if (windowData.filename === filename) {
+            windowData.rootFile = file;
+            windows.set(windowId, windowData);
+            loadPlotInWindow(windowId, windowData.objectName, file, true);
+          }
+        });
+        
+      }).catch(error => {
+        console.error('Error refreshing file:', error);
+        document.getElementById('status').textContent = `Error refreshing ${filename}: ${error}`;
+      });
+    }
   </script>
 </body>
 </html> 
