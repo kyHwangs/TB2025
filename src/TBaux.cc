@@ -167,7 +167,7 @@ std::vector<float> TBaux::GetPosition(std::vector<std::vector<float>> wave) {
 }
 
 void TBaux::Fill(TBevt<TBwaveform> anEvent) {
-
+  
   std::vector<std::vector<float>> tDWCwaves;
   tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1R")).pedcorrectedWaveform());
   tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1L")).pedcorrectedWaveform());

@@ -536,12 +536,14 @@ void TBplotengine::Fill(TBevt<TBwaveform> anEvent) {
   } else if (fCaseName == "heatmap") {
 
     for (int i = 0; i < fPlotter_Ceren.size(); i++) {
+
       double value = GetValue(anEvent.GetData(fPlotter_Ceren.at(i).cid).waveform(), fPlotter_Ceren.at(i).xInit, fPlotter_Ceren.at(i).xFin);
       fPlotter_Ceren.at(i).hist1D->Fill(value);
       // std::cout << i << " " <<  fPlotter_Ceren.at(i).cid.mid() << " " << fPlotter_Ceren.at(i).cid.channel() << std::endl;
     }
 
     for (int i = 0; i < fPlotter_Scint.size(); i++) {
+
       double value = GetValue(anEvent.GetData(fPlotter_Scint.at(i).cid).waveform(), fPlotter_Scint.at(i).xInit, fPlotter_Scint.at(i).xFin);
       fPlotter_Scint.at(i).hist1D->Fill(value);
       // std::cout << i << " " << fPlotter_Scint.at(i).cid.mid() << " " << fPlotter_Scint.at(i).cid.channel() << std::endl;

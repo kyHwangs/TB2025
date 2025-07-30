@@ -167,6 +167,8 @@ void TBmonit<T>::LoopLive() {
   if (fAuxPlotting)
     fAux.SetApp(fApp);
 
+  // for (int idx = 0; idx < 10; idx++) {
+
   std::vector<int> tUniqueMID = {};
   if (fAuxPlotting) tUniqueMID = fUtility.GetUniqueMID(fPlotter.GetUniqueMID(), fAux.GetUniqueMID());
   else              tUniqueMID = fPlotter.GetUniqueMID();
@@ -317,6 +319,7 @@ void TBmonit<T>::LoopAfterRun() {
     }
 
     TBevt<TBwaveform> anEvent = readerWave.GetAnEvent();
+
     if (fAuxCut)
       if (!fAux.IsPassing(anEvent))
         continue;
@@ -324,7 +327,6 @@ void TBmonit<T>::LoopAfterRun() {
     fPlotter.Fill(anEvent);
     if (fAuxPlotting)
       fAux.Fill(anEvent);
-    
   }
   fPlotter.Update();
   if (fAuxPlotting)

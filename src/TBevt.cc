@@ -14,8 +14,7 @@ const T TBevt<T>::GetData(const TBcid &cid) const
 
   for (const auto &aMid : fMapMids)
   {
-    if (aMid.first == cid.mid())
-    // if (aMid.second.mid() == cid.mid())
+    if (aMid.second.mid() == cid.mid())
     {
       adata = aMid.second.channel(cid.channel() - 1); // WARNING channel number 1 - 32
       break;
