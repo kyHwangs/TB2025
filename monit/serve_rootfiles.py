@@ -11,7 +11,7 @@ import threading
 from flask import Flask, request, Response, jsonify, send_from_directory, send_file
 
 # 현재 실행되는 파이썬 파일의 디렉토리를 기준으로 절대경로 생성
-BASE_DIR = "/Users/khwang/scratch/TB2025/dev_250707/TB2025/monit"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.join(BASE_DIR, "output")
 INDEX_DIR = BASE_DIR
 
