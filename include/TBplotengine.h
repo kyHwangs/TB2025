@@ -68,6 +68,7 @@ public:
   void init();
   void init_single_module();
   void init_2D();
+  void init_full();
   void init_MCPPMT();
   void init_SiPM();
   void init_Generic();
@@ -138,6 +139,8 @@ private:
 
   TApplication* fApp;
   TCanvas* fCanvas;
+  std::vector<TCanvas*> fCanvasFull;
+
   TLegend* fLeg;
 
   CalcInfo fCalcInfo;

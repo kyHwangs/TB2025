@@ -146,6 +146,8 @@ void TBmonit<T>::LoopLive() {
 
   if (aModules.size() == 1 && (aCase == "heatmap" || aCase == "module")) {
     fPlotter.SetModule(aModules.at(0));
+  } else if (aCase == "full") {
+
   } else if (aCase == "single") {
 
     // std::vector<TBcid> aCID;

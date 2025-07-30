@@ -109,19 +109,25 @@ void TBplotengine::init() {
     else                  fCanvas->Divide(2, 2);
 
     init_single_module();
+  } else if (fCaseName == "full") {
+
+    fCanvasFull.push_back(new TCanvas("fCanvasHeatmap", "fCanvasHeatmap", 2700, 1000));
+    fCanvasFull.at(0)->Divide(2, 1);
+
+    auto tPadLeft = fCanvasFull.at(0)->cd(1);
+    tPadLeft->SetRightMargin(0.13);
+
+    auto tPadRight = fCanvasFull.at(0)->cd(2);
+    tPadRight->SetRightMargin(0.13);
+
+    for (int i = 1; i <= 9; i++) {
+      std::string aCanvasName = Form("fCanvas_Module%d", i);
+      fCanvasFull.push_back(new TCanvas((TString)aCanvasName, (TString)aCanvasName, 1400, 1400));
+      fCanvasFull.at(i)->Divide(2, 2);
+    }
+
+    init_Generic();
   }
-
-  // std::cout << fCIDtoPlot_Ceren.size() << std::endl;
-  // for (int i = 0; i < fPlotter_Ceren.size(); i++) {
-  //   std::cout << i << " " << fPlotter_Ceren.at(i).name << " " << fPlotter_Ceren.at(i).info.row << " " << fPlotter_Ceren.at(i).info.col << " ";
-  //   fPlotter_Ceren.at(i).cid.print();
-  // }
-
-  // std::cout << fCIDtoPlot_Scint.size() << std::endl;
-  // for (int i = 0; i < fPlotter_Scint.size(); i++) {
-  //   std::cout << i << " " << fPlotter_Scint.at(i).name << " " << fPlotter_Scint.at(i).info.row << " " << fPlotter_Scint.at(i).info.col << " ";
-  //   fPlotter_Scint.at(i).cid.print();
-  // }
 }
 
 void TBplotengine::init_single_module() {
@@ -311,6 +317,9 @@ void TBplotengine::init_Generic() {
       fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aCName), ";PeakADC;nEvents", 288, -512., 4096.));
 
 
+    fPlotter_Ceren.at(i).hist1D->SetLineWidth(2);
+    fPlotter_Ceren.at(i).hist1D->SetLineColor(kBlue);
+
     std::string aSName = plotVec.at(i) + "-S";
     TBcid aSCID = fUtility.GetCID(aSName);
     TButility::mod_info aSInfo = fUtility.GetInfo(aSName);
@@ -326,8 +335,10 @@ void TBplotengine::init_Generic() {
     if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
       fPlotter_Scint.at(i).SetPlot(new TH1D((TString)(aSName), ";PeakADC;nEvents", 288, -512., 4096.));
 
-  }
+    fPlotter_Scint.at(i).hist1D->SetLineWidth(2);
+    fPlotter_Scint.at(i).hist1D->SetLineColor(kRed);
 
+  }
 
   f2DHistCeren = new TH2D("CERENKOV", "CERENKOV;;", 6, 0.5, 6.5, 6, 0.5, 6.5);
   f2DHistCeren->SetStats(0);
@@ -533,7 +544,7 @@ void TBplotengine::Fill(TBevt<TBwaveform> anEvent) {
       }
     }
 
-  } else if (fCaseName == "heatmap") {
+  } else if (fCaseName == "heatmap" || fCaseName == "full") {
 
     for (int i = 0; i < fPlotter_Ceren.size(); i++) {
 
@@ -565,15 +576,16 @@ void TBplotengine::Fill(TBevt<TBwaveform> anEvent) {
 }
 
 void TBplotengine::Draw() {
-;
+
   if (fCalcInfo == TBplotengine::CalcInfo::kAvgTimeStruc) {
     for (int i = 0; i < fPlotter_Ceren.size(); i++)
       fLeg->AddEntry(fPlotter_Ceren.at(i).hist1D, fPlotter_Ceren.at(i).name.c_str(), "l");
 
   }
 
-  fCanvas->cd();
   if (fCaseName == "single") {
+    fCanvas->cd();
+
     if (fCalcInfo == TBplotengine::CalcInfo::kOverlay) {
       fPlotter_Ceren.at(0).hist2D->Draw("colz");
 
@@ -600,6 +612,22 @@ void TBplotengine::Draw() {
       fCanvas->cd(i + 1);
       fPlotter_Ceren.at(i).hist1D->Draw("Hist");
       fPlotter_Scint.at(i).hist1D->Draw("Hist & sames");
+    }
+  } else if (fCaseName == "full") {
+    
+    fCanvasFull.at(0)->cd(1);
+    f2DHistCeren->Draw("colz text");
+  
+    fCanvasFull.at(0)->cd(2);
+    f2DHistScint->Draw("colz text");
+
+    for (int idx = 0; idx < fPlotter_Ceren.size(); idx++) {
+      int iModule = idx / 4 + 1;
+      int iTower = idx % 4 + 1;
+
+      fCanvasFull.at(iModule)->cd(iTower);
+      fPlotter_Ceren.at(idx).hist1D->Draw("Hist");
+      fPlotter_Scint.at(idx).hist1D->Draw("Hist & sames");
     }
   }
 
@@ -746,18 +774,109 @@ void TBplotengine::Update() {
     }
 
     fIsFirst = false;
+  } else if (fCaseName == "full") {
+
+    f2DHistCeren->SetTitle((TString)"Run " + std::to_string(fRunNum) + " CERENKOV - " + std::to_string((int)fPlotter_Ceren.at(0).hist1D->GetEntries()));
+    for (int i = 0; i < fPlotter_Ceren.size(); i++)
+      f2DHistCeren->SetBinContent(fPlotter_Ceren.at(i).info.row, fPlotter_Ceren.at(i).info.col, (int)fPlotter_Ceren.at(i).hist1D->GetMean());
+
+    f2DHistScint->SetTitle((TString)"Run " + std::to_string(fRunNum) + " SCINTILLATION - " + std::to_string((int)fPlotter_Scint.at(0).hist1D->GetEntries()));
+    for (int i = 0; i < fPlotter_Scint.size(); i++)
+      f2DHistScint->SetBinContent(fPlotter_Scint.at(i).info.row, fPlotter_Scint.at(i).info.col, (int)fPlotter_Scint.at(i).hist1D->GetMean());
+
+    fCanvasFull.at(0)->cd(1);
+    f2DHistCeren->Draw("colz text");
+
+    fCanvasFull.at(0)->cd(2);
+    f2DHistScint->Draw("colz text");
+
+    fCanvasFull.at(0)->Update();
+
+
+    for (int idx = 0; idx < fPlotter_Ceren.size(); idx++) {
+      int iModule = idx / 4 + 1;
+      int iTower = idx % 4 + 1;
+      
+      if (fPlotter_Ceren.at(idx).hist1D->GetMaximum() > fPlotter_Scint.at(idx).hist1D->GetMaximum()) {
+
+        fCanvasFull.at(iModule)->cd(iTower);
+        fPlotter_Ceren.at(idx).hist1D->Draw("Hist");
+
+        if (fIsFirst) {
+          fCanvasFull.at(iModule)->Update();
+          TPaveStats* stat_c = (TPaveStats*)fPlotter_Ceren.at(idx).hist1D->FindObject("stats");
+          stat_c->SetTextColor(4);
+          stat_c->SetY2NDC(1.);
+          stat_c->SetY1NDC(.8);
+          stat_c->SaveStyle();
+        }
+
+        fCanvasFull.at(iModule)->cd(iTower);
+        fPlotter_Scint.at(idx).hist1D->Draw("Hist & sames");
+
+        if (fIsFirst) {
+          fCanvasFull.at(iModule)->Update();
+          TPaveStats* stat_s = (TPaveStats*)fPlotter_Scint.at(idx).hist1D->FindObject("stats");
+          stat_s->SetTextColor(2);
+          stat_s->SetY2NDC(.8);
+          stat_s->SetY1NDC(.6);
+          stat_s->SaveStyle();
+        }
+
+      } else {
+
+        fCanvasFull.at(iModule)->cd(iTower);
+        fPlotter_Scint.at(idx).hist1D->Draw("Hist");
+
+        if (fIsFirst) {
+          fCanvasFull.at(iModule)->Update();
+          TPaveStats* stat_s = (TPaveStats*)fPlotter_Scint.at(idx).hist1D->FindObject("stats");
+          stat_s->SetTextColor(2);
+          stat_s->SetY2NDC(.8);
+          stat_s->SetY1NDC(.6);
+          stat_s->SaveStyle();
+        }
+
+        fCanvasFull.at(iModule)->cd(iTower);
+        fPlotter_Ceren.at(idx).hist1D->Draw("Hist & sames");
+
+        if (fIsFirst) {
+          fCanvasFull.at(iModule)->Update();
+          TPaveStats* stat_c = (TPaveStats*)fPlotter_Ceren.at(idx).hist1D->FindObject("stats");
+          stat_c->SetTextColor(4);
+          stat_c->SetY2NDC(1.);
+          stat_c->SetY1NDC(.8);
+          stat_c->SaveStyle();
+        }
+      }
+      fCanvasFull.at(iModule)->Update();
+    }
+
+    if (fIsFirst)fIsFirst = false;
   }
 
-  // SaveAs("");
-  fCanvas->cd();
-  fCanvas->Update();
-  if (fDraw) fCanvas->Pad()->Draw();
+  if (fCaseName != "full") {
+    fCanvas->cd();
+    fCanvas->Update();
+    if (fDraw) fCanvas->Pad()->Draw();
+  }
+  
+  if (fCaseName == "full") {
+    TString output = "./output/Run" + std::to_string(fRunNum) + "_" + fCaseName + "_" + fMethod + ".root";
+    TFile* outoutFile = new TFile(output, "RECREATE");
+    outoutFile->cd();
 
-  TString output = "./output/Run" + std::to_string(fRunNum) + "_" + fCaseName + "_" + fMethod + "_" + fModule + ".root";
-  TFile* outoutFile = new TFile(output, "RECREATE");
-  outoutFile->cd();
-  fCanvas->Write();
-  outoutFile->Close();
+    for (int i = 0; i < fCanvasFull.size(); i++)
+      fCanvasFull.at(i)->Write();
+    
+    outoutFile->Close();
+  } else {
+    TString output = "./output/Run" + std::to_string(fRunNum) + "_" + fCaseName + "_" + fMethod + "_" + fModule + ".root";    
+    TFile* outoutFile = new TFile(output, "RECREATE");
+    outoutFile->cd();
+    fCanvas->Write();
+    outoutFile->Close();
+  }
 
   // if (fUsingAUX) gSystem->ProcessEvents();
   // else           fApp->Run(false);
@@ -842,7 +961,7 @@ std::vector<int> TBplotengine::GetUniqueMID() {
   if (fCaseName == "single") {
 
     return fUtility.GetUniqueMID(fCIDtoPlot_Ceren);
-  } else if (fCaseName == "heatmap" || fCaseName == "module") {
+  } else if (fCaseName == "heatmap" || fCaseName == "module" || fCaseName == "full") {
 
     return fUtility.GetUniqueMID(fCIDtoPlot_Ceren, fCIDtoPlot_Scint);
   }
