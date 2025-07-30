@@ -387,17 +387,20 @@ def list_root_files():
     try:
         files_info = []
         for f in os.listdir(ROOT_DIR):
-            if f.endswith(".root"):
+            # ROOT 파일과 GIF 파일 모두 포함
+            if f.endswith((".root", ".gif")):
                 file_path = os.path.join(ROOT_DIR, f)
                 if os.path.exists(file_path):
                     # Get file creation/modification time
                     stat = os.stat(file_path)
                     # Use modification time (mtime) as it's more reliable than creation time
                     modification_time = stat.st_mtime
+                    file_type = "gif" if f.endswith(".gif") else "root"
                     files_info.append({
                         'name': f,
                         'mtime': modification_time,
-                        'size': stat.st_size
+                        'size': stat.st_size,
+                        'type': file_type
                     })
         
         # Sort by modification time (most recent first)
