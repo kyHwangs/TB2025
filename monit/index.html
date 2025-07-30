@@ -1377,12 +1377,25 @@ Type a command and press Enter to execute.
       windowCounter++;
       const windowId = `window_${windowCounter}`;
       
+      // Calculate position with cycling every 10 windows
+      const maxWindowsPerCycle = 10;
+      const windowIndexInCycle = (windowCounter - 1) % maxWindowsPerCycle;
+      const cycleNumber = Math.floor((windowCounter - 1) / maxWindowsPerCycle);
+      
+      // Base position for each cycle (slightly offset to avoid overlap)
+      const baseLeft = 50 + cycleNumber * 20;
+      const baseTop = 50 + cycleNumber * 20;
+      
+      // Position within the cycle
+      const left = baseLeft + windowIndexInCycle * 30;
+      const top = baseTop + windowIndexInCycle * 30;
+      
       // Create window element with larger initial size
       const windowElement = document.createElement('div');
       windowElement.className = 'plot-window';
       windowElement.id = windowId;
-      windowElement.style.left = `${50 + (windowCounter - 1) * 30}px`;
-      windowElement.style.top = `${50 + (windowCounter - 1) * 30}px`;
+      windowElement.style.left = `${left}px`;
+      windowElement.style.top = `${top}px`;
       windowElement.style.width = '600px';  // Increased from 400px
       windowElement.style.height = '500px'; // Increased from 350px
       
