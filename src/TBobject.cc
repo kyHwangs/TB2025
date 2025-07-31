@@ -23,6 +23,11 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
       AddVariable("MaxEvent", std::stoi(fArgv[i]));
     }
 
+    if (fArgv[i] == "--SkipEvent") {
+      i++;
+      AddVariable("SkipEvent", std::stoi(fArgv[i]));
+    }
+
     if (fArgv[i] == "--MaxFile") {
       i++;
       AddVariable("MaxFile", std::stoi(fArgv[i]));

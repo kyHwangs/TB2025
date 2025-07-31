@@ -518,24 +518,11 @@ TBevt<T> TBread<T>::GetAnEvent()
     anEvent.insert(std::make_pair(fMIDMap.at(i), fFileMap.at(fMIDMap.at(i))->ReadEvent()));
 
   int ref_event_num = anEvent.at(fMIDMap.at(0)).evt();
-  for (int i = 1; i < fMIDMap.size(); i++)
+  for (int i = 1; i < fMIDMap.size(); i++) 
     if (anEvent.at(fMIDMap.at(i)).evt() != ref_event_num)
       throw std::runtime_error(ANSI.RED + ANSI.BOLD + "TBread<T>::GetAnEvent() - event num does not match between MIDs : " + std::to_string(fMIDMap.at(i)) + ANSI.END);
   
-  // int ref_test = anEvent.at(fMIDMap.at(0)).evt();
-  // for(int i = 1; i < fMIDMap.size(); i++)
-  //  std::cout << fMIDMap.at(0) << " " << i << " " << fMIDMap.at(i) << " " << ref_test << " " << anEvent.at(fMIDMap.at(i)).evt() << std::endl;
-
-  // for (auto aMID : anEvent) {
-  //   std::cout << aMID.first << " " << aMID.second.mid() << std::endl;
-  //   std::cout << aMID.first << " " << aMID.second.evt() << std::endl;
-  //   std::cout << aMID.first << " " << aMID.second.tcb_trig_number() << std::endl;
-  // }
-
   returnEvt.Set(anEvent);
-
-  // std::cout << returnEvt.Size() << std::endl;
-  // returnEvt.Print();
 
   fCurrentEvent++;
   return std::move(returnEvt);
