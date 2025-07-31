@@ -1179,7 +1179,7 @@ Type a command and press Enter to execute.
                 <option value="PeakADC">PeakADC</option>
                 <option value="Avg">Avg</option>
                 <option value="Overlay">Overlay</option>
-
+                <option value="Waveform">Waveform</option>
               </select>
             </div>
           </div>
@@ -1187,7 +1187,19 @@ Type a command and press Enter to execute.
           <div class="form-row">
             <div class="form-group">
               <label for="moduleInput">Module:</label>
-              <input type="text" id="moduleInput" placeholder="single channel name (e.g. M1-T1-S) for --type single, module name (e.g. M5) for --type module, Generic, MCPPMT for --type heatmap">
+                              <input type="text" id="moduleInput" placeholder="Optional: single channel name (e.g. M1-T1-S) for --type single, module name (e.g. M5) for --type module, Generic, MCPPMT for --type heatmap">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="maxEventInput">Max Event:</label>
+              <input type="number" id="maxEventInput" placeholder="Optional: maximum number of events to process" min="1">
+            </div>
+            
+            <div class="form-group">
+              <label for="skipEventInput">Skip Event:</label>
+              <input type="number" id="skipEventInput" placeholder="Optional: number of events to skip" min="0">
             </div>
           </div>
           
@@ -1217,7 +1229,7 @@ Type a command and press Enter to execute.
           
           <div class="command-preview">
             <label>Generated Command:</label>
-            <div id="commandPreview" class="preview-text">./monit --RunNumber 6034 --type module --method IntADC --module M5</div>
+            <div id="commandPreview" class="preview-text">./monit --RunNumber 99999 --type module --method IntADC</div>
           </div>
         </div>
       </div>
@@ -2300,12 +2312,12 @@ Type a command and press Enter to execute.
         }
       }
       
-      // 프레임 번호 표시
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(10, 10, 100, 25);
-      ctx.fillStyle = 'white';
-      ctx.font = '12px Arial';
-      ctx.fillText(`Frame ${frameIndex + 1}/${gifData.totalFrames}`, 15, 27);
+      // 프레임 번호 표시 제거 - 패널 하단에 이미 표시되고 있음
+      // ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      // ctx.fillRect(10, 10, 100, 25);
+      // ctx.fillStyle = 'white';
+      // ctx.font = '12px Arial';
+      // ctx.fillText(`Frame ${frameIndex + 1}/${gifData.totalFrames}`, 15, 27);
     }
 
     // GIF 재생/일시정지 토글
@@ -3238,14 +3250,31 @@ Type a command and press Enter to execute.
     
     // Monit Command Builder Functions
     function updateCommandPreview() {
-      const runNumber = document.getElementById('runNumber').value || '6034';
+      const runNumber = document.getElementById('runNumber').value || '99999';
       const type = document.getElementById('typeSelect').value;
       const method = document.getElementById('methodSelect').value;
-      const module = document.getElementById('moduleInput').value || 'M5';
+      const module = document.getElementById('moduleInput').value;
+      const maxEvent = document.getElementById('maxEventInput').value;
+      const skipEvent = document.getElementById('skipEventInput').value;
       const live = document.getElementById('liveCheck').checked;
       const aux = document.getElementById('auxCheck').checked;
       
-      let command = `./monit --RunNumber ${runNumber} --type ${type} --method ${method} --module ${module}`;
+      let command = `./monit --RunNumber ${runNumber} --type ${type} --method ${method}`;
+      
+      // Module이 입력되었을 때만 --module 추가
+      if (module && module.trim()) {
+        command += ` --module ${module}`;
+      }
+      
+      // MaxEvent가 입력되었을 때만 --MaxEvent 추가
+      if (maxEvent && maxEvent.trim()) {
+        command += ` --MaxEvent ${maxEvent}`;
+      }
+      
+      // SkipEvent가 입력되었을 때만 --SkipEvent 추가
+      if (skipEvent && skipEvent.trim()) {
+        command += ` --SkipEvent ${skipEvent}`;
+      }
       
       if (aux) command += ' --AUX';
       if (live) command += ' --LIVE';
@@ -3264,6 +3293,8 @@ Type a command and press Enter to execute.
       const type = document.getElementById('typeSelect').value;
       const method = document.getElementById('methodSelect').value;
       const module = document.getElementById('moduleInput').value;
+      const maxEvent = document.getElementById('maxEventInput').value;
+      const skipEvent = document.getElementById('skipEventInput').value;
       const live = document.getElementById('liveCheck').checked;
       const aux = document.getElementById('auxCheck').checked;
       
@@ -3274,14 +3305,23 @@ Type a command and press Enter to execute.
         return;
       }
       
-      if (!module.trim()) {
-        addToOutput('❌ Error: Module is required', 'command-error');
-        document.getElementById('moduleInput').focus();
-        return;
+      // Build command
+      let command = `./monit --RunNumber ${runNumber} --type ${type} --method ${method}`;
+      
+      // Module이 입력되었을 때만 --module 추가
+      if (module && module.trim()) {
+        command += ` --module ${module}`;
       }
       
-      // Build command
-      let command = `./monit --RunNumber ${runNumber} --type ${type} --method ${method} --module ${module}`;
+      // MaxEvent가 입력되었을 때만 --MaxEvent 추가
+      if (maxEvent && maxEvent.trim()) {
+        command += ` --MaxEvent ${maxEvent}`;
+      }
+      
+      // SkipEvent가 입력되었을 때만 --SkipEvent 추가
+      if (skipEvent && skipEvent.trim()) {
+        command += ` --SkipEvent ${skipEvent}`;
+      }
       
       if (aux) command += ' --AUX';
       if (live) command += ' --LIVE';
@@ -3301,6 +3341,8 @@ Type a command and press Enter to execute.
       const typeSelect = document.getElementById('typeSelect');
       const methodSelect = document.getElementById('methodSelect');
       const moduleInput = document.getElementById('moduleInput');
+      const maxEventInput = document.getElementById('maxEventInput');
+      const skipEventInput = document.getElementById('skipEventInput');
       const liveCheck = document.getElementById('liveCheck');
       const auxCheck = document.getElementById('auxCheck');
       const executeBtn = document.getElementById('executeMonitBtn');
@@ -3310,6 +3352,8 @@ Type a command and press Enter to execute.
       if (typeSelect) typeSelect.addEventListener('change', updateCommandPreview);
       if (methodSelect) methodSelect.addEventListener('change', updateCommandPreview);
       if (moduleInput) moduleInput.addEventListener('input', updateCommandPreview);
+      if (maxEventInput) maxEventInput.addEventListener('input', updateCommandPreview);
+      if (skipEventInput) skipEventInput.addEventListener('input', updateCommandPreview);
       if (liveCheck) liveCheck.addEventListener('change', updateCommandPreview);
       if (auxCheck) auxCheck.addEventListener('change', updateCommandPreview);
       
@@ -3317,8 +3361,8 @@ Type a command and press Enter to execute.
       if (executeBtn) executeBtn.addEventListener('click', executeMonitCommand);
       
       // Set default values and update preview
-      if (runNumber) runNumber.value = '6034';
-      if (moduleInput) moduleInput.value = 'M5';
+      if (runNumber) runNumber.value = '99999';
+      // moduleInput, maxEventInput, skipEventInput은 기본값 없이 비워둠 - 선택적으로 사용
       updateCommandPreview();
     }
     

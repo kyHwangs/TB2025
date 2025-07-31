@@ -105,14 +105,24 @@ def parse_envset_sh():
         except Exception:
             pass  # 기본값 사용
         
-        # DYLD_LIBRARY_PATH 설정
-        dyld_paths = [install_lib_path, root_lib_path]
+        # DYLD_LIBRARY_PATH 설정 (install/lib을 최우선으로)
+        dyld_paths = [install_lib_path]  # install/lib을 먼저 추가
+        if os.path.exists(root_lib_path):
+            dyld_paths.append(root_lib_path)
+        # 추가 표준 경로들
+        additional_paths = ["/opt/homebrew/lib", "/usr/local/lib", "/usr/lib"]
+        for path in additional_paths:
+            if os.path.exists(path) and path not in dyld_paths:
+                dyld_paths.append(path)
+        
         if 'DYLD_LIBRARY_PATH' in CUSTOM_ENV:
             existing_paths = CUSTOM_ENV['DYLD_LIBRARY_PATH'].split(':')
-            for path in dyld_paths:
-                if path not in existing_paths:
-                    existing_paths.append(path)
-            CUSTOM_ENV['DYLD_LIBRARY_PATH'] = ':'.join(existing_paths)
+            # install_lib_path를 맨 앞에 놓기
+            new_paths = [install_lib_path]
+            for path in existing_paths + dyld_paths[1:]:
+                if path and path not in new_paths:
+                    new_paths.append(path)
+            CUSTOM_ENV['DYLD_LIBRARY_PATH'] = ':'.join(new_paths)
         else:
             CUSTOM_ENV['DYLD_LIBRARY_PATH'] = ':'.join(dyld_paths)
             
@@ -707,20 +717,48 @@ def check_and_fix_rpath():
         if result.returncode != 0:
             return "⚠️  Could not read rpath information"
         
-        # 현재 ROOT 버전 찾기
+        # 현재 ROOT 라이브러리 경로 찾기
         current_root_lib = None
-        try:
-            root_cellar_path = "/opt/homebrew/Cellar/root"
-            if os.path.exists(root_cellar_path):
-                versions = [d for d in os.listdir(root_cellar_path) if os.path.isdir(os.path.join(root_cellar_path, d))]
-                if versions:
-                    latest_version = sorted(versions)[-1]
-                    current_root_lib = f"/opt/homebrew/Cellar/root/{latest_version}/lib/root"
-        except Exception:
-            pass
+        
+        # 1. ROOTSYS 환경변수에서 찾기
+        if 'ROOTSYS' in CUSTOM_ENV:
+            potential_lib = os.path.join(CUSTOM_ENV['ROOTSYS'], 'lib')
+            if os.path.exists(potential_lib):
+                current_root_lib = potential_lib
+        
+        # 2. Homebrew Cellar에서 찾기 (백업)
+        if not current_root_lib:
+            try:
+                root_cellar_path = "/opt/homebrew/Cellar/root"
+                if os.path.exists(root_cellar_path):
+                    versions = [d for d in os.listdir(root_cellar_path) if os.path.isdir(os.path.join(root_cellar_path, d))]
+                    if versions:
+                        latest_version = sorted(versions)[-1]
+                        potential_lib = f"/opt/homebrew/Cellar/root/{latest_version}/lib/root"
+                        if os.path.exists(potential_lib):
+                            current_root_lib = potential_lib
+            except Exception:
+                pass
+        
+        # 3. 표준 경로들 시도
+        if not current_root_lib:
+            standard_paths = [
+                "/opt/homebrew/lib/root",
+                "/usr/local/lib/root", 
+                "/usr/lib/root"
+            ]
+            for path in standard_paths:
+                if os.path.exists(path):
+                    current_root_lib = path
+                    break
         
         if not current_root_lib:
-            return "❌ Could not determine current ROOT library path"
+            # 더 적극적으로 해결 - DYLD_LIBRARY_PATH에 install/lib 추가
+            install_lib_path = os.path.join(os.path.dirname(BASE_DIR), "install", "lib")
+            if os.path.exists(install_lib_path):
+                return f"⚠️  ROOT library path not found, but install/lib exists.\n✅ Adding install/lib to DYLD_LIBRARY_PATH should resolve the issue.\n   Path: {install_lib_path}"
+            else:
+                return "❌ Could not determine ROOT library path and install/lib not found"
         
         # rpath에서 ROOT 경로 찾기
         lines = result.stdout.split('\n')
@@ -1073,9 +1111,54 @@ def serve_dqm_manual():
         return f"Error serving DQM manual: {str(e)}", 500
 
 if __name__ == '__main__':
-    print(f"✅ Server running on http://localhost:8000")
+    print(f"✅ Server starting...")
     print(f"📁 Serving ROOT files from: {ROOT_DIR}")
     print(f"🌐 Serving web files from: {INDEX_DIR}")
     print(f"💻 Command execution enabled (forbidden: rm, cd)")
-    print(f"🔧 Environment initialization available")
+    
+    # 서버 시작 시 자동으로 환경 초기화 및 라이브러리 설정
+    print(f"🔧 Initializing environment and fixing library paths...")
+    
+    # 1. 환경변수 초기화
+    success, message = parse_envset_sh()
+    if success:
+        print(f"✅ Environment initialized: {message}")
+        
+        # 중요한 라이브러리 경로 정보 출력
+        install_lib_path = os.path.join(os.path.dirname(BASE_DIR), "install", "lib")
+        libdrc_path = os.path.join(install_lib_path, "libdrcTB.dylib")
+        
+        print(f"📍 Key paths:")
+        print(f"   Install lib: {install_lib_path}")
+        print(f"   libdrcTB.dylib: {'✅ Found' if os.path.exists(libdrc_path) else '❌ Missing'}")
+        
+        if 'DYLD_LIBRARY_PATH' in CUSTOM_ENV:
+            print(f"   DYLD_LIBRARY_PATH: {CUSTOM_ENV['DYLD_LIBRARY_PATH'][:100]}...")
+        if 'ROOTSYS' in CUSTOM_ENV:
+            print(f"   ROOTSYS: {CUSTOM_ENV['ROOTSYS']}")
+    else:
+        print(f"⚠️  Environment initialization warning: {message}")
+    
+    # 2. 라이브러리 의존성 확인
+    try:
+        lib_checks = check_library_dependencies()
+        print(f"🔍 Library dependency checks:")
+        # lib_checks는 문자열이므로 줄바꿈으로 분리해서 출력
+        for line in lib_checks.split('\n'):
+            if line.strip():
+                print(f"   {line}")
+    except Exception as e:
+        print(f"⚠️  Library dependency check failed: {str(e)}")
+    
+    # 3. rpath 자동 수정
+    try:
+        rpath_result = check_and_fix_rpath()
+        print(f"🔧 RPath fix result:")
+        for line in rpath_result.split('\n'):
+            if line.strip():
+                print(f"   {line}")
+    except Exception as e:
+        print(f"⚠️  RPath fix failed: {str(e)}")
+    
+    print(f"✅ Server ready on http://localhost:8000")
     app.run(host='0.0.0.0', port=8000, debug=True)
