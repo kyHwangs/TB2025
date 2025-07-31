@@ -1220,6 +1220,14 @@ Type a command and press Enter to execute.
               </label>
             </div>
             
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="auxcutCheck">
+                <span class="checkmark"></span>
+                AUXcut
+              </label>
+            </div>
+            
             <div class="form-group form-group-button">
               <button id="executeMonitBtn" class="execute-monit-btn">
                 ▶️ Execute ./monit
@@ -3258,6 +3266,7 @@ Type a command and press Enter to execute.
       const skipEvent = document.getElementById('skipEventInput').value;
       const live = document.getElementById('liveCheck').checked;
       const aux = document.getElementById('auxCheck').checked;
+      const auxcut = document.getElementById('auxcutCheck').checked;
       
       let command = `./monit --RunNumber ${runNumber} --type ${type} --method ${method}`;
       
@@ -3277,6 +3286,7 @@ Type a command and press Enter to execute.
       }
       
       if (aux) command += ' --AUX';
+      if (auxcut) command += ' --AUXcut';
       if (live) command += ' --LIVE';
       
       document.getElementById('commandPreview').textContent = command;
@@ -3297,6 +3307,7 @@ Type a command and press Enter to execute.
       const skipEvent = document.getElementById('skipEventInput').value;
       const live = document.getElementById('liveCheck').checked;
       const aux = document.getElementById('auxCheck').checked;
+      const auxcut = document.getElementById('auxcutCheck').checked;
       
       // Validation
       if (!runNumber) {
@@ -3324,6 +3335,7 @@ Type a command and press Enter to execute.
       }
       
       if (aux) command += ' --AUX';
+      if (auxcut) command += ' --AUXcut';
       if (live) command += ' --LIVE';
       
       // Show the command being executed
@@ -3345,6 +3357,7 @@ Type a command and press Enter to execute.
       const skipEventInput = document.getElementById('skipEventInput');
       const liveCheck = document.getElementById('liveCheck');
       const auxCheck = document.getElementById('auxCheck');
+      const auxcutCheck = document.getElementById('auxcutCheck');
       const executeBtn = document.getElementById('executeMonitBtn');
       
       // Add event listeners for real-time preview update
@@ -3356,6 +3369,7 @@ Type a command and press Enter to execute.
       if (skipEventInput) skipEventInput.addEventListener('input', updateCommandPreview);
       if (liveCheck) liveCheck.addEventListener('change', updateCommandPreview);
       if (auxCheck) auxCheck.addEventListener('change', updateCommandPreview);
+      if (auxcutCheck) auxcutCheck.addEventListener('change', updateCommandPreview);
       
       // Execute button
       if (executeBtn) executeBtn.addEventListener('click', executeMonitCommand);
