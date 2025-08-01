@@ -5,7 +5,7 @@
 #include "TPaveStats.h"
 
 TBplotengine::TBplotengine(const YAML::Node fConfig_, int fRunNum_, bool fLive_, bool fDraw_, TButility fUtility_)
-: fConfig(fConfig_), fRunNum(fRunNum_), fLive(fLive_), fDraw(fDraw_), fUtility(fUtility_), fCaseName("")
+: fConfig(fConfig_), fRunNum(fRunNum_), fLive(fLive_), fDraw(fDraw_), fUtility(fUtility_), fCaseName(""), fAuxCut(false)
 {}
 
 void TBplotengine::init() {
@@ -863,6 +863,7 @@ void TBplotengine::Update() {
   
   if (fCaseName == "full") {
     TString output = "./output/Run" + std::to_string(fRunNum) + "_" + fCaseName + "_" + fMethod + ".root";
+    if (fAuxCut) output = "./output/Run" + std::to_string(fRunNum) + "_" + fCaseName + "_" + fMethod + "_AuxCut.root";
     TFile* outoutFile = new TFile(output, "RECREATE");
     outoutFile->cd();
 
@@ -871,7 +872,8 @@ void TBplotengine::Update() {
     
     outoutFile->Close();
   } else {
-    TString output = "./output/Run" + std::to_string(fRunNum) + "_" + fCaseName + "_" + fMethod + "_" + fModule + ".root";    
+    TString output = "./output/Run" + std::to_string(fRunNum) + "_" + fCaseName + "_" + fMethod + "_" + fModule + ".root"; 
+    if (fAuxCut) output = "./output/Run" + std::to_string(fRunNum) + "_" + fCaseName + "_" + fMethod + "_" + fModule + "_AuxCut.root";
     TFile* outoutFile = new TFile(output, "RECREATE");
     outoutFile->cd();
     fCanvas->Write();

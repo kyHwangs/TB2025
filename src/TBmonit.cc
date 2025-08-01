@@ -175,6 +175,11 @@ void TBmonit<T>::LoopLive() {
   if (fAuxPlotting) tUniqueMID = fUtility.GetUniqueMID(fPlotter.GetUniqueMID(), fAux.GetUniqueMID());
   else              tUniqueMID = fPlotter.GetUniqueMID();
 
+  if (fAuxCut) {
+    fPlotter.SetAUXCut(true);
+    fAux.SetAUXCut(true);
+  }
+
   TBread<TBwaveform> readerWave =
     TBread<TBwaveform>(
       fRunNum,
@@ -237,6 +242,11 @@ void TBmonit<T>::LoopAfterRun() {
 
   TBplotengine fPlotter = TBplotengine(fConfig.GetConfig()["ModuleConfig"], fRunNum, fIsLive, fDraw, fUtility);
   TBaux fAux = TBaux(fConfig.GetConfig()["AUX"], fRunNum, fAuxPlotting, fIsLive, fDraw, fUtility);
+
+  if (fAuxCut) {
+    fPlotter.SetAUXCut(true);
+    fAux.SetAUXCut(true);
+  }
 
   std::string aCase;
   fObj->GetVariable("type", &aCase); //'single', 'heatmap', 'module'

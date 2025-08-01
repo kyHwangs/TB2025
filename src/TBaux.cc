@@ -7,7 +7,7 @@
 
 
 TBaux::TBaux(const YAML::Node fNodePlot_, int fRunNum_, bool fPlotting_, bool fLive_, bool fDraw_, TButility fUtility_)
-: fNodeAux(fNodePlot_), fRunNum(fRunNum_), fPlotting(fPlotting_), fLive(fLive_), fDraw(fDraw_), fUtility(fUtility_)
+: fNodeAux(fNodePlot_), fRunNum(fRunNum_), fPlotting(fPlotting_), fLive(fLive_), fDraw(fDraw_), fUtility(fUtility_), fAuxCut(false)
 {
 
   fIsFirst = true;
@@ -35,6 +35,8 @@ void TBaux::init() {
   fMCcut = fNodeAux["MC"][fMethod].as<double>();
   fCC1cut = fNodeAux["CC1"][fMethod].as<double>();
   fCC2cut = fNodeAux["CC2"][fMethod].as<double>();
+  fDWCPosCut = fNodeAux["DWC"]["POSCUT"].as<double>();
+  fDWCCorr = fNodeAux["DWC"]["CORR"].as<double>();
 
   fDWC1 = new TH2D("DWC1", (TString)"Run " + std::to_string(fRunNum) + " DWC 1 position;X [mm];Y [mm]", 200, -50., 50., 200, -50., 50.);
   fDWC1->SetStats(0);
@@ -194,44 +196,11 @@ void TBaux::Fill(TBevt<TBwaveform> anEvent) {
 
 bool TBaux::IsPassing(TBevt<TBwaveform> anEvent) {
 
-  // !! NEED UPDATE
-  // return true;
-
-  // double tPS_value = GetValue(anEvent.GetData(fUtility.GetCID("PS")).waveform(), fRangeMap.at("PS").at(0), fRangeMap.at("PS").at(1));
-  // double tMC_value = GetValue(anEvent.GetData(fUtility.GetCID("MC")).waveform(), fRangeMap.at("MC").at(0), fRangeMap.at("MC").at(1));
-
-  // if (tPS_value < fPScut)
+  // if (fPScut > GetValue(anEvent.GetData(fUtility.GetCID("PS")).waveform(), fRangeMap.at("PS").at(0), fRangeMap.at("PS").at(1)))
   //   return false;
 
-  // if (tMC_value > fMCcut)
+  // if (fMCcut > GetValue(anEvent.GetData(fUtility.GetCID("MC")).waveform(), fRangeMap.at("MC").at(0), fRangeMap.at("MC").at(1)))
   //   return false;
-
-  // return true;
-
-  // std::vector<std::vector<float>> tDWCwaves;
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1R")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1L")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1U")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1D")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2R")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2L")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2U")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2D")).pedcorrectedWaveform());
-
-  // auto posVec = GetPosition(tDWCwaves);
-  // std::vector<float> posCen = {};
-  // for (int i = 0; i < posVec.size(); i++)
-  //   posCen.push_back(posVec.at(i) - fDWCCenter.at(i));
-
-  // if (posCen.at(1) > 0)
-  //   return true;
-
-  // return false;
-
-  // double tDWC2R_value = GetValue(anEvent.GetData(fUtility.GetCID("DWC2R")).waveform(), fRangeMap.at("DWC2R").at(0), fRangeMap.at("DWC2R").at(1));
-  // if (tDWC2R_value < 120.) return false;
-  // return true;
-
 
 
   std::vector<std::vector<float>> tDWCwaves;
@@ -244,16 +213,24 @@ bool TBaux::IsPassing(TBevt<TBwaveform> anEvent) {
   tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2U")).pedcorrectedWaveform());
   tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2D")).pedcorrectedWaveform());
 
-  auto posVec = GetPosition(tDWCwaves);
+  auto posVec = GetPosition(tDWCwaves); // 1X, 1Y, 2X, 2Y
+  std::vector<float> posCen = {};
+  for (int i = 0; i < posVec.size(); i++)
+    posCen.push_back(posVec.at(i) - fDWCCenter.at(i));
 
-  double xCenTmp = 20.;
-  double yCenTmp = -20.;
+  if ( !(std::abs(posCen.at(0)) < fDWCPosCut && std::abs(posCen.at(1)) < fDWCPosCut) )
+    return false;
 
-  double distance_DWC1 = std::sqrt((posVec.at(0) - xCenTmp) * (posVec.at(0) - xCenTmp) + (posVec.at(1) - yCenTmp) * (posVec.at(1) - yCenTmp));
-  if (distance_DWC1 > 10.) return false;
+  if ( !(std::abs(posCen.at(2)) < fDWCPosCut && std::abs(posCen.at(3)) < fDWCPosCut) )
+    return false;
+
+  if ( std::abs(posCen.at(0) - posCen.at(2)) > fDWCCorr )
+    return false;
+
+  if ( std::abs(posCen.at(1) - posCen.at(3)) > fDWCCorr )
+    return false;
+
   return true;
-
-
 }
 
 void TBaux::Draw() {
@@ -369,6 +346,7 @@ void TBaux::Update() {
   if (fDraw) fCanvas->Pad()->Draw();
 
   TString output = "./output/Run" + std::to_string(fRunNum) + "_AUX.root";
+  if (fAuxCut) output = "./output/Run" + std::to_string(fRunNum) + "_AUX_AuxCut.root";
   TFile* outoutFile = new TFile(output, "RECREATE");
   outoutFile->cd();
   fCanvas->Write();

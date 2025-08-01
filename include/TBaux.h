@@ -75,6 +75,7 @@ public:
     if (fMethod == "Overlay" || fMethod == "Avg") fMethod = "IntADC";
   }
   void SetApp(TApplication* fApp_) { fApp = fApp_; }
+  void SetAUXCut(bool fAuxCut_) { fAuxCut = fAuxCut_; }
 
   bool IsPassing(TBevt<TBwaveform> anEvent);
 
@@ -86,6 +87,8 @@ private:
   bool fPlotting;
   bool fLive;
   bool fDraw;
+  bool fAuxCut;
+
   TButility fUtility;
 
   TApplication* fApp;
@@ -113,6 +116,8 @@ private:
   double fMCcut;
   double fCC1cut;
   double fCC2cut;
+  double fDWCPosCut;
+  double fDWCCorr;
 
   std::vector<TBcid> fCIDtoPlot;
   std::map<std::string, std::vector<int>> fRangeMap;
