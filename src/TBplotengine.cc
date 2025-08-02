@@ -515,6 +515,19 @@ double TBplotengine::GetIntADC(std::vector<short> waveform, int xInit, int xFin)
   return intADC_;
 }
 
+double TBplotengine::GetIntADC_MCPPMTSingleChannel(std::vector<short> waveform, int xInit, int xFin) {
+
+  double ped = 0;
+  for (int i = 1; i < 51; i++)
+    ped += (double)waveform.at(i) / 50.;
+
+  double intADC_ = 0;
+  for (int i = xInit; i < xFin; i++)
+    intADC_ += ped - (double)waveform.at(i);
+
+  return intADC_;
+}
+
 void TBplotengine::PrintInfo() {
 
 }

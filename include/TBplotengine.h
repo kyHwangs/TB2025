@@ -85,8 +85,12 @@ public:
 
   double GetPeakADC(std::vector<short> waveform, int xInit, int xFin);
   double GetIntADC(std::vector<short> waveform, int xInit, int xFin);
+  double GetIntADC_MCPPMTSingleChannel(std::vector<short> waveform, int xInit, int xFin);
 
   double GetValue(std::vector<short> waveform, int xInit, int xFin) {
+
+    if(fCalcInfo == CalcInfo::kIntADC && fModule == "MCPPMT" && fCaseName == "heatmap")
+      return GetIntADC_MCPPMTSingleChannel(waveform, xInit, xFin);
 
     if(fCalcInfo == CalcInfo::kPeakADC)
       return GetPeakADC(waveform, xInit, xFin);
