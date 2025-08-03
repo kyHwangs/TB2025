@@ -3,17 +3,17 @@ project(dual-readout_TB)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(yaml-cpp_DIR /Users/Shared/cvmfs/sft.cern.ch/lcg/releases/yamlcpp/0.6.3-d05b2/arm64-mac12-clang131-opt/lib/cmake/yaml-cpp)
+# set(yaml-cpp_DIR /Users/Shared/cvmfs/sft.cern.ch/lcg/releases/yamlcpp/0.6.3-d05b2/arm64-mac15-clang170-opt/lib/cmake/yaml-cpp)
 
 include(GNUInstallDirs)
 
 find_package(ROOT REQUIRED)
-find_package(yaml-cpp REQUIRED)
+# find_package(yaml-cpp REQUIRED)
 
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  /Users/Shared/cvmfs/sft.cern.ch/lcg/releases/yamlcpp/0.6.3-d05b2/arm64-mac12-clang131-opt/include
+  # /Users/Shared/cvmfs/sft.cern.ch/lcg/releases/yamlcpp/0.6.3-d05b2/arm64-mac15-clang170-opt/include
 )
 
 file(GLOB sources
@@ -34,7 +34,7 @@ target_include_directories(drcTB PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${RO
 target_link_libraries(
   drcTB
   ${ROOT_LIBRARIES}
-  ${YAML_CPP_LIBRARIES}
+  # ${YAML_CPP_LIBRARIES}
 )
 
 target_include_directories(drcTB PUBLIC

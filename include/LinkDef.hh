@@ -18,7 +18,5 @@
 #pragma link C++ class TBevt < TBwaveform> + ;
 #pragma link C++ class TBevt < TBfastmode> + ;
 
-#pragma link C++ class TBmonit < TBwaveform> + ;
-#pragma link C++ class TBmonit < TBfastmode> + ;
 
 #endif
