@@ -137,7 +137,7 @@ void TBmonit<T>::LoopLive() {
     // !throw exception
   } else {
     fPlotter.SetMethod(aMethod);
-    fAux.SetMethod(aMethod);
+    fAux.SetMethod("PeakADC");
   }
 
   std::vector<std::string> aModules = {};
@@ -262,7 +262,7 @@ void TBmonit<T>::LoopAfterRun() {
     // !throw exception
   } else {
     fPlotter.SetMethod(aMethod);
-    fAux.SetMethod(aMethod);
+    fAux.SetMethod("PeakADC");
   }
 
   std::vector<std::string> aModules = {};
