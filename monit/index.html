@@ -17,6 +17,12 @@
       border-right: 1px solid #ccc;
       overflow-y: auto;
       padding: 10px;
+      transition: margin-left 0.3s ease, opacity 0.3s ease;
+    }
+    
+    #sidebar.hidden {
+      margin-left: -550px;
+      opacity: 0;
     }
     #sidebar h2 {
       margin: 0;
@@ -842,6 +848,39 @@
       opacity: 0.8;
       color: #555;
     }
+    
+    /* Sidebar Toggle Button Styles */
+    #sidebarToggle {
+      margin-left: 15px;
+      margin-right: 15px;
+    }
+    
+    #toggleSidebarBtn {
+      padding: 8px 12px;
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    #toggleSidebarBtn:hover {
+      background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+    }
+    
+    #toggleSidebarBtn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+    }
 
     
 
@@ -1079,6 +1118,13 @@
   
   <div id="main">
     <div id="tabBar">
+      <!-- Sidebar Toggle Button -->
+      <div id="sidebarToggle">
+        <button id="toggleSidebarBtn" onclick="toggleSidebar()" title="Toggle sidebar">
+          📂 ◀
+        </button>
+      </div>
+      
       <div class="tabs-wrapper">
         <div class="tab active" data-panel="rootPanel">DQM Viewer</div>
         <div class="tab" data-panel="commandPanel">
@@ -3786,6 +3832,24 @@ Type a command and press Enter to execute.
           body.innerHTML = `<div style="color: orange; text-align: center; padding: 20px; font-size: 12px;">⚠️ Could not refresh plot</div>`;
         });
       }, 50);
+    }
+    
+    // Sidebar toggle functionality
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const toggleBtn = document.getElementById('toggleSidebarBtn');
+      
+      if (sidebar.classList.contains('hidden')) {
+        // Show sidebar
+        sidebar.classList.remove('hidden');
+        toggleBtn.innerHTML = '📂 ◀';
+        toggleBtn.title = 'Hide sidebar';
+      } else {
+        // Hide sidebar
+        sidebar.classList.add('hidden');
+        toggleBtn.innerHTML = '📂 ▶';
+        toggleBtn.title = 'Show sidebar';
+      }
     }
     
     // System Info Functions

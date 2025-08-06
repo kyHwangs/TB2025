@@ -165,6 +165,11 @@ std::vector<float> TBaux::GetPosition(std::vector<std::vector<float>> wave) {
   tDWCpos.push_back((tDWCtime.at(4) - tDWCtime.at(5)) * fDWCCalib.at(4) + fDWCCalib.at(5)); // DWC2 X
   tDWCpos.push_back((tDWCtime.at(6) - tDWCtime.at(7)) * fDWCCalib.at(6) + fDWCCalib.at(7)); // DWC2 Y
 
+  tDWCpos.at(0) = tDWCpos.at(0) - fDWCCenter.at(0);
+  tDWCpos.at(1) = tDWCpos.at(1) - fDWCCenter.at(1);
+  tDWCpos.at(2) = tDWCpos.at(2) - fDWCCenter.at(2);
+  tDWCpos.at(3) = tDWCpos.at(3) - fDWCCenter.at(3);
+
   return tDWCpos;
 }
 
@@ -209,42 +214,25 @@ bool TBaux::IsPassing(TBevt<TBwaveform> anEvent) {
 
   auto posVec = GetPosition(tDWCwaves); // 1X, 1Y, 2X, 2Y
 
-  if ( posVec.at(0) < 0) return false;
-  if ( posVec.at(1) < 0) return false;
+  if ( !(std::abs(posVec.at(0)) < fDWCPosCut && std::abs(posVec.at(1)) < fDWCPosCut) )
+    return false;
+
+  if ( !(std::abs(posVec.at(2)) < fDWCPosCut && std::abs(posVec.at(3)) < fDWCPosCut) )
+    return false;
+
+  if ( std::abs(posVec.at(0) - posVec.at(2)) > fDWCCorr )
+    return false;
+
+  if ( std::abs(posVec.at(1) - posVec.at(3)) > fDWCCorr )
+    return false;
 
 
-  // if (fPScut > GetValue(anEvent.GetData(fUtility.GetCID("PS")).waveform(), fRangeMap.at("PS").at(0), fRangeMap.at("PS").at(1)))
-  //   return false;
+  if (fPScut > GetValue(anEvent.GetData(fUtility.GetCID("PS")).waveform(), fRangeMap.at("PS").at(0), fRangeMap.at("PS").at(1)))
+    return false;
 
-  // if (fMCcut > GetValue(anEvent.GetData(fUtility.GetCID("MC")).waveform(), fRangeMap.at("MC").at(0), fRangeMap.at("MC").at(1)))
-  //   return false;
+  if (fMCcut < GetValue(anEvent.GetData(fUtility.GetCID("MC")).waveform(), fRangeMap.at("MC").at(0), fRangeMap.at("MC").at(1)))
+    return false;
 
-  // std::vector<std::vector<float>> tDWCwaves;
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1R")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1L")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1U")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1D")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2R")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2L")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2U")).pedcorrectedWaveform());
-  // tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2D")).pedcorrectedWaveform());
-
-  // auto posVec = GetPosition(tDWCwaves); // 1X, 1Y, 2X, 2Y
-  // std::vector<float> posCen = {};
-  // for (int i = 0; i < posVec.size(); i++)
-  //   posCen.push_back(posVec.at(i) - fDWCCenter.at(i));
-
-  // if ( !(std::abs(posCen.at(0)) < fDWCPosCut && std::abs(posCen.at(1)) < fDWCPosCut) )
-  //   return false;
-
-  // if ( !(std::abs(posCen.at(2)) < fDWCPosCut && std::abs(posCen.at(3)) < fDWCPosCut) )
-  //   return false;
-
-  // if ( std::abs(posCen.at(0) - posCen.at(2)) > fDWCCorr )
-  //   return false;
-
-  // if ( std::abs(posCen.at(1) - posCen.at(3)) > fDWCCorr )
-  //   return false;
 
   return true;
 }

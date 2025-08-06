@@ -3,10 +3,10 @@ Mapping: "../mapping/mapping_TB2025_v1.root"
 AUX:
   PS:
     IntADC: 100000
-    PeakADC: 1000
+    PeakADC: 0
   MC:
     IntADC: 100000
-    PeakADC: 1000
+    PeakADC: 38
   CC1:
     IntADC: 100000
     PeakADC: 1000
@@ -14,10 +14,10 @@ AUX:
     IntADC: 100000
     PeakADC: 1000
   DWC:
-    CENTER: [0, 0, 0, 0] # 1X, 1Y, 2X, 2Y
+    CENTER: [-3.875, -6.502, -1.794, -7.513] # 1X, 1Y, 2X, 2Y
     CALIB: [0.180654, 0.217961, -0.180342, -0.0994697, 0.181416, -0.00911072, -0.17822, -0.0489771]
     POSCUT: 5 #mm
-    CORR: 5 #mm
+    CORR: 4 #mm
 ModuleConfig:
   T1: [680, 800]
   T2: [100, 200]
