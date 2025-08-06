@@ -214,10 +214,16 @@ bool TBaux::IsPassing(TBevt<TBwaveform> anEvent) {
 
   auto posVec = GetPosition(tDWCwaves); // 1X, 1Y, 2X, 2Y
 
-  if ( !(std::abs(posVec.at(0)) < fDWCPosCut && std::abs(posVec.at(1)) < fDWCPosCut) )
+  // if ( !(std::abs(posVec.at(0)) < fDWCPosCut && std::abs(posVec.at(1)) < fDWCPosCut) )
+  //   return false;
+
+  // if ( !(std::abs(posVec.at(2)) < fDWCPosCut && std::abs(posVec.at(3)) < fDWCPosCut) )
+  //   return false;
+
+  if ( std::sqrt(posVec.at(0) * posVec.at(0) + posVec.at(1) * posVec.at(1)) > 10 )
     return false;
 
-  if ( !(std::abs(posVec.at(2)) < fDWCPosCut && std::abs(posVec.at(3)) < fDWCPosCut) )
+  if ( std::sqrt(posVec.at(2) * posVec.at(2) + posVec.at(3) * posVec.at(3)) > 10 )
     return false;
 
   if ( std::abs(posVec.at(0) - posVec.at(2)) > fDWCCorr )
