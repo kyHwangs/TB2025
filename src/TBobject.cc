@@ -38,6 +38,11 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
       AddVariable("type", fArgv[i]);
     }
 
+    if (fArgv[i] == "--particle") {
+      i++;
+      AddVariable("particle", fArgv[i]);
+    }
+
     if (fArgv[i] == "--method") {
       i++;
       AddVariable("method", fArgv[i]);

@@ -76,6 +76,7 @@ public:
   }
   void SetApp(TApplication* fApp_) { fApp = fApp_; }
   void SetAUXCut(bool fAuxCut_) { fAuxCut = fAuxCut_; }
+  void SetParticle(std::string fParticle_);
 
   bool IsPassing(TBevt<TBwaveform> anEvent);
 
@@ -88,6 +89,7 @@ private:
   bool fLive;
   bool fDraw;
   bool fAuxCut;
+  std::string fParticle;
 
   TButility fUtility;
 
@@ -113,6 +115,8 @@ private:
   TH1D* fFrameBot;
 
   double fPScut;
+  double fPSInitCut;
+  double fPSFinCut;
   double fMCcut;
   double fCC1cut;
   double fCC2cut;

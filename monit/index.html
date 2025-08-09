@@ -1247,6 +1247,16 @@ Type a command and press Enter to execute.
               <label for="skipEventInput">Skip Event:</label>
               <input type="number" id="skipEventInput" placeholder="Optional: number of events to skip" min="0">
             </div>
+            
+            <div class="form-group">
+              <label for="particleSelect">Particle:</label>
+              <select id="particleSelect">
+                <option value="">Optional: select particle type</option>
+                <option value="PROTON">PROTON</option>
+                <option value="KAON">KAON</option>
+                <option value="PION">PION</option>
+              </select>
+            </div>
           </div>
           
           <div class="form-row">
@@ -3310,6 +3320,7 @@ Type a command and press Enter to execute.
       const module = document.getElementById('moduleInput').value;
       const maxEvent = document.getElementById('maxEventInput').value;
       const skipEvent = document.getElementById('skipEventInput').value;
+      const particle = document.getElementById('particleSelect').value;
       const live = document.getElementById('liveCheck').checked;
       const aux = document.getElementById('auxCheck').checked;
       const auxcut = document.getElementById('auxcutCheck').checked;
@@ -3329,6 +3340,11 @@ Type a command and press Enter to execute.
       // SkipEvent가 입력되었을 때만 --SkipEvent 추가
       if (skipEvent && skipEvent.trim()) {
         command += ` --SkipEvent ${skipEvent}`;
+      }
+      
+      // Particle가 선택되었을 때만 --particle 추가
+      if (particle && particle.trim()) {
+        command += ` --particle ${particle}`;
       }
       
       if (aux) command += ' --AUX';
@@ -3351,6 +3367,7 @@ Type a command and press Enter to execute.
       const module = document.getElementById('moduleInput').value;
       const maxEvent = document.getElementById('maxEventInput').value;
       const skipEvent = document.getElementById('skipEventInput').value;
+      const particle = document.getElementById('particleSelect').value;
       const live = document.getElementById('liveCheck').checked;
       const aux = document.getElementById('auxCheck').checked;
       const auxcut = document.getElementById('auxcutCheck').checked;
@@ -3380,6 +3397,11 @@ Type a command and press Enter to execute.
         command += ` --SkipEvent ${skipEvent}`;
       }
       
+      // Particle가 선택되었을 때만 --particle 추가
+      if (particle && particle.trim()) {
+        command += ` --particle ${particle}`;
+      }
+      
       if (aux) command += ' --AUX';
       if (auxcut) command += ' --AUXcut';
       if (live) command += ' --LIVE';
@@ -3401,6 +3423,7 @@ Type a command and press Enter to execute.
       const moduleInput = document.getElementById('moduleInput');
       const maxEventInput = document.getElementById('maxEventInput');
       const skipEventInput = document.getElementById('skipEventInput');
+      const particleSelect = document.getElementById('particleSelect');
       const liveCheck = document.getElementById('liveCheck');
       const auxCheck = document.getElementById('auxCheck');
       const auxcutCheck = document.getElementById('auxcutCheck');
@@ -3413,6 +3436,7 @@ Type a command and press Enter to execute.
       if (moduleInput) moduleInput.addEventListener('input', updateCommandPreview);
       if (maxEventInput) maxEventInput.addEventListener('input', updateCommandPreview);
       if (skipEventInput) skipEventInput.addEventListener('input', updateCommandPreview);
+      if (particleSelect) particleSelect.addEventListener('change', updateCommandPreview);
       if (liveCheck) liveCheck.addEventListener('change', updateCommandPreview);
       if (auxCheck) auxCheck.addEventListener('change', updateCommandPreview);
       if (auxcutCheck) auxcutCheck.addEventListener('change', updateCommandPreview);

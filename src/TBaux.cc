@@ -33,8 +33,10 @@ void TBaux::init() {
 
   fPScut = fNodeAux["PS"][fMethod].as<double>();
   fMCcut = fNodeAux["MC"][fMethod].as<double>();
-  fCC1cut = fNodeAux["CC1"][fMethod].as<double>();
-  fCC2cut = fNodeAux["CC2"][fMethod].as<double>();
+  fCC1cut = -1;
+  fCC2cut = -1;
+  fPSInitCut = -1;
+  fPSFinCut = -1;
   fDWCPosCut = fNodeAux["DWC"]["POSCUT"].as<double>();
   fDWCCorr = fNodeAux["DWC"]["CORR"].as<double>();
 
@@ -93,7 +95,32 @@ void TBaux::init() {
   fCanvas->cd(2)->SetRightMargin(0.13);
   fCanvas->cd(5)->SetRightMargin(0.13);
   fCanvas->cd(6)->SetRightMargin(0.13);
+}
 
+void TBaux::SetParticle(std::string fParticle_) {
+
+  fParticle = fParticle_;
+
+  if (fParticle == "PION") {
+    fCC1cut = fNodeAux["PION"]["CC1"].as<double>(); 
+    fCC2cut = fNodeAux["PION"]["CC2"].as<double>();
+    fPSInitCut = fNodeAux["PION"]["PS_INIT"].as<double>();
+    fPSFinCut = fNodeAux["PION"]["PS_FIN"].as<double>();
+  }
+
+  if (fParticle == "KAON") {
+    fCC1cut = fNodeAux["KAON"]["CC1"].as<double>();
+    fCC2cut = fNodeAux["KAON"]["CC2"].as<double>();
+    fPSInitCut = fNodeAux["KAON"]["PS_INIT"].as<double>();
+    fPSFinCut = fNodeAux["KAON"]["PS_FIN"].as<double>();
+  }
+
+  if (fParticle == "PROTON") {
+    fCC1cut = fNodeAux["PROTON"]["CC1"].as<double>();
+    fCC2cut = fNodeAux["PROTON"]["CC2"].as<double>();
+    fPSInitCut = fNodeAux["PROTON"]["PS_INIT"].as<double>();
+    fPSFinCut = fNodeAux["PROTON"]["PS_FIN"].as<double>();
+  }
 }
 
 void TBaux::SetRange(const YAML::Node tConfigNode) {
@@ -220,11 +247,11 @@ bool TBaux::IsPassing(TBevt<TBwaveform> anEvent) {
   // if ( !(std::abs(posVec.at(2)) < fDWCPosCut && std::abs(posVec.at(3)) < fDWCPosCut) )
   //   return false;
 
-  if ( std::sqrt(posVec.at(0) * posVec.at(0) + posVec.at(1) * posVec.at(1)) > 10 )
-    return false;
+  // if ( std::sqrt(posVec.at(0) * posVec.at(0) + posVec.at(1) * posVec.at(1)) > 10 )
+  //   return false;
 
-  if ( std::sqrt(posVec.at(2) * posVec.at(2) + posVec.at(3) * posVec.at(3)) > 10 )
-    return false;
+  // if ( std::sqrt(posVec.at(2) * posVec.at(2) + posVec.at(3) * posVec.at(3)) > 10 )
+  //   return false;
 
   if ( std::abs(posVec.at(0) - posVec.at(2)) > fDWCCorr )
     return false;
@@ -232,13 +259,50 @@ bool TBaux::IsPassing(TBevt<TBwaveform> anEvent) {
   if ( std::abs(posVec.at(1) - posVec.at(3)) > fDWCCorr )
     return false;
 
-
-  if (fPScut > GetValue(anEvent.GetData(fUtility.GetCID("PS")).waveform(), fRangeMap.at("PS").at(0), fRangeMap.at("PS").at(1)))
-    return false;
-
   if (fMCcut < GetValue(anEvent.GetData(fUtility.GetCID("MC")).waveform(), fRangeMap.at("MC").at(0), fRangeMap.at("MC").at(1)))
     return false;
 
+    // - pion: (CC1, CC2) = (pedestal, signal) 선택
+    // - kaon: (CC1, CC2) = (pedestal, signal) 선택
+    // - proton: (CC1, CC2) = (안씀, pedestal) 선택
+    // 셋 다 구현이 되면 좋고, 안되면 pion proton만 되어도 좋습니다. 하나만 되면 pion으로 하고요.
+  
+  double tIntADC_PS = GetValue(anEvent.GetData(fUtility.GetCID("PS")).waveform(), fRangeMap.at("PS").at(0), fRangeMap.at("PS").at(1));
+  if (fParticle == "PION") {
+  
+    if ( !(fPSInitCut < tIntADC_PS && tIntADC_PS < fPSFinCut) )
+      return false;
+
+    if (fCC1cut < GetValue(anEvent.GetData(fUtility.GetCID("CC1")).waveform(), fRangeMap.at("CC1").at(0), fRangeMap.at("CC1").at(1)))
+      return false;
+
+    if (fCC2cut > GetValue(anEvent.GetData(fUtility.GetCID("CC2")).waveform(), fRangeMap.at("CC2").at(0), fRangeMap.at("CC2").at(1)))
+      return false;
+
+  } else if (fParticle == "KAON") {
+
+    if ( !(fPSInitCut < tIntADC_PS && tIntADC_PS < fPSFinCut) )
+      return false;
+
+    if (fCC1cut < GetValue(anEvent.GetData(fUtility.GetCID("CC1")).waveform(), fRangeMap.at("CC1").at(0), fRangeMap.at("CC1").at(1)))
+      return false;
+
+    if (fCC2cut > GetValue(anEvent.GetData(fUtility.GetCID("CC2")).waveform(), fRangeMap.at("CC2").at(0), fRangeMap.at("CC2").at(1)))
+      return false;
+
+  } else if (fParticle == "PROTON") {
+    
+    if ( !(fPSInitCut < tIntADC_PS && tIntADC_PS < fPSFinCut) )
+      return false;
+
+    if (fCC2cut < GetValue(anEvent.GetData(fUtility.GetCID("CC2")).waveform(), fRangeMap.at("CC2").at(0), fRangeMap.at("CC2").at(1)))
+      return false;
+
+  } else {
+
+    if (fPScut > GetValue(anEvent.GetData(fUtility.GetCID("PS")).waveform(), fRangeMap.at("PS").at(0), fRangeMap.at("PS").at(1)))
+      return false;
+  }
 
   return true;
 }

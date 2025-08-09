@@ -39,6 +39,7 @@ private:
 
   std::string fBaseDir;
   std::string fMapping;
+  std::string fParticle;
 
   int fRunNum;
   int fMaxEvent;

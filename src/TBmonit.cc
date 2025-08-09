@@ -62,6 +62,8 @@ TBmonit<T>::TBmonit(ObjectCollection* fObj_)
   fObj->GetVariable("AUXcut", &fAuxCut);
   fObj->GetVariable("DRAW", &fDraw);
 
+  fObj->GetVariable("particle", &fParticle);
+
   gROOT->SetBatch(!fDraw);
 
   if (fIsLive) {
@@ -164,6 +166,9 @@ void TBmonit<T>::LoopLive() {
     fAux.init();
     fAux.SetRange(fConfig.GetConfig()["ModuleConfig"]);
   }
+
+  if (fParticle != "null")
+    fAux.SetParticle(fParticle);
 
   fPlotter.SetApp(fApp);
   if (fAuxPlotting)
@@ -287,6 +292,9 @@ void TBmonit<T>::LoopAfterRun() {
     fAux.SetRange(fConfig.GetConfig()["ModuleConfig"]);
     fPlotter.SetAUX();
   }
+
+  if (fParticle != "null")
+    fAux.SetParticle(fParticle);
 
   fPlotter.SetApp(fApp);
   if (fAuxPlotting)
