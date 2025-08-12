@@ -1,4 +1,4 @@
-BaseDirectory: "/Volumes/HDD_16TB_3" # "/Users/yhep/scratch/YUdaq"
+BaseDirectory: "/Volumes/Macintosh\ HD/Users/yhep/scratch/YUdaq/"
 Mapping: "../mapping/mapping_TB2025_v1.root"
 AUX:
   PS:

@@ -38,6 +38,13 @@ void TBaux::init() {
   fDWCPosCut = fNodeAux["DWC"]["POSCUT"].as<double>();
   fDWCCorr = fNodeAux["DWC"]["CORR"].as<double>();
 
+  std::cout << "fPScut: " << fPScut << std::endl;
+  std::cout << "fMCcut: " << fMCcut << std::endl;
+  std::cout << "fCC1cut: " << fCC1cut << std::endl;
+  std::cout << "fCC2cut: " << fCC2cut << std::endl;
+  std::cout << "fDWCPosCut: " << fDWCPosCut << std::endl;
+  std::cout << "fDWCCorr: " << fDWCCorr << std::endl;
+
   fDWC1 = new TH2D("DWC1", (TString)"Run " + std::to_string(fRunNum) + " DWC 1 position;X [mm];Y [mm]", 200, -50., 50., 200, -50., 50.);
   fDWC1->SetStats(0);
 
@@ -59,13 +66,13 @@ void TBaux::init() {
     fFrameTop = new TH1D("TopFrame", ";IntADC;nEvents", 440, -30000., 300000.);
     fFrameBot = new TH1D("BotFrame", ";IntADC;nEvents", 440, -30000., 300000.);
   } else if (fMethod == "PeakADC") {
-    fPS = new TH1D("PS_AUX", ";PeakADC;nEvents", 288, -512., 4096.);
-    fMC = new TH1D("MC_AUX", ";PeakADC;nEvents", 288, -512., 4096.);
-    fTC = new TH1D("TC_AUX", ";IntADC;nEvents", 288, -512., 4096.);
-    fCC1 = new TH1D("CC1_AUX", ";PeakADC;nEvents", 288, -512., 4096.);
-    fCC2 = new TH1D("CC2_AUX", ";PeakADC;nEvents", 288, -512., 4096.);
-    fFrameTop = new TH1D("TopFrame", ";PeakADC;nEvents", 288, -512., 4096.);
-    fFrameBot = new TH1D("BotFrame", ";PeakADC;nEvents", 288, -512., 4096.);
+    fPS = new TH1D("PS_AUX", ";PeakADC;nEvents", 1152, -512., 4096.);
+    fMC = new TH1D("MC_AUX", ";PeakADC;nEvents", 1152, -512., 4096.);
+    fTC = new TH1D("TC_AUX", ";IntADC;nEvents", 1152, -512., 4096.);
+    fCC1 = new TH1D("CC1_AUX", ";PeakADC;nEvents", 1152, -512., 4096.);
+    fCC2 = new TH1D("CC2_AUX", ";PeakADC;nEvents", 1152, -512., 4096.);
+    fFrameTop = new TH1D("TopFrame", ";PeakADC;nEvents", 1152, -512., 4096.);
+    fFrameBot = new TH1D("BotFrame", ";PeakADC;nEvents", 1152, -512., 4096.);
   }
 
   fPS->SetLineColor(4);
@@ -165,6 +172,11 @@ std::vector<float> TBaux::GetPosition(std::vector<std::vector<float>> wave) {
   tDWCpos.push_back((tDWCtime.at(4) - tDWCtime.at(5)) * fDWCCalib.at(4) + fDWCCalib.at(5)); // DWC2 X
   tDWCpos.push_back((tDWCtime.at(6) - tDWCtime.at(7)) * fDWCCalib.at(6) + fDWCCalib.at(7)); // DWC2 Y
 
+  tDWCpos.at(0) = tDWCpos.at(0) - fDWCCenter.at(0);
+  tDWCpos.at(1) = tDWCpos.at(1) - fDWCCenter.at(1);
+  tDWCpos.at(2) = tDWCpos.at(2) - fDWCCenter.at(2);
+  tDWCpos.at(3) = tDWCpos.at(3) - fDWCCenter.at(3);
+
   return tDWCpos;
 }
 
@@ -196,12 +208,6 @@ void TBaux::Fill(TBevt<TBwaveform> anEvent) {
 
 bool TBaux::IsPassing(TBevt<TBwaveform> anEvent) {
 
-  // if (fPScut > GetValue(anEvent.GetData(fUtility.GetCID("PS")).waveform(), fRangeMap.at("PS").at(0), fRangeMap.at("PS").at(1)))
-  //   return false;
-
-  // if (fMCcut > GetValue(anEvent.GetData(fUtility.GetCID("MC")).waveform(), fRangeMap.at("MC").at(0), fRangeMap.at("MC").at(1)))
-  //   return false;
-
 
   std::vector<std::vector<float>> tDWCwaves;
   tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC1R")).pedcorrectedWaveform());
@@ -214,21 +220,32 @@ bool TBaux::IsPassing(TBevt<TBwaveform> anEvent) {
   tDWCwaves.push_back(anEvent.GetData(fUtility.GetCID("DWC2D")).pedcorrectedWaveform());
 
   auto posVec = GetPosition(tDWCwaves); // 1X, 1Y, 2X, 2Y
-  std::vector<float> posCen = {};
-  for (int i = 0; i < posVec.size(); i++)
-    posCen.push_back(posVec.at(i) - fDWCCenter.at(i));
 
-  if ( !(std::abs(posCen.at(0)) < fDWCPosCut && std::abs(posCen.at(1)) < fDWCPosCut) )
+  // if ( !(std::abs(posVec.at(0)) < fDWCPosCut && std::abs(posVec.at(1)) < fDWCPosCut) )
+  //   return false;
+
+  // if ( !(std::abs(posVec.at(2)) < fDWCPosCut && std::abs(posVec.at(3)) < fDWCPosCut) )
+  //   return false;
+
+  // if ( std::sqrt(posVec.at(0) * posVec.at(0) + posVec.at(1) * posVec.at(1)) > 10 )
+  //   return false;
+
+  // if ( std::sqrt(posVec.at(2) * posVec.at(2) + posVec.at(3) * posVec.at(3)) > 10 )
+  //   return false;
+
+  if ( std::abs(posVec.at(0) - posVec.at(2)) > fDWCCorr )
     return false;
 
-  if ( !(std::abs(posCen.at(2)) < fDWCPosCut && std::abs(posCen.at(3)) < fDWCPosCut) )
+  if ( std::abs(posVec.at(1) - posVec.at(3)) > fDWCCorr )
     return false;
 
-  if ( std::abs(posCen.at(0) - posCen.at(2)) > fDWCCorr )
+
+  // if (fPScut > GetValue(anEvent.GetData(fUtility.GetCID("PS")).waveform(), fRangeMap.at("PS").at(0), fRangeMap.at("PS").at(1)))
+  //   return false;
+
+  if (fMCcut > GetValue(anEvent.GetData(fUtility.GetCID("MC")).waveform(), fRangeMap.at("MC").at(0), fRangeMap.at("MC").at(1)))
     return false;
 
-  if ( std::abs(posCen.at(1) - posCen.at(3)) > fDWCCorr )
-    return false;
 
   return true;
 }

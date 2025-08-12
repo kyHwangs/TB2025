@@ -33,6 +33,11 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
       AddVariable("MaxFile", std::stoi(fArgv[i]));
     }
 
+    if (fArgv[i] == "--Case") {
+      i++;
+      AddVariable("Case", std::stoi(fArgv[i]));
+    }
+
     if (fArgv[i] == "--type") {
       i++;
       AddVariable("type", fArgv[i]);
@@ -41,6 +46,11 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
     if (fArgv[i] == "--method") {
       i++;
       AddVariable("method", fArgv[i]);
+    }
+
+    if (fArgv[i] == "--suffix") {
+      i++;
+      AddVariable("suffix", fArgv[i]);
     }
 
     if (fArgv[i] == "--module") {
@@ -53,6 +63,45 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
         }
 
         AddVec("module", fArgv[i]);
+      }
+    }
+
+    if (fArgv[i] == "--ignore") {
+      while(i < fArgv.size()) {
+        i++;
+
+        if (fArgv[i].find("--") != std::string::npos || fArgv[i] == "" || i == fArgv.size()) {
+          i--;
+          break;
+        }
+
+        AddVec("ignore", fArgv[i]);
+      }
+    }
+
+    if (fArgv[i] == "--energy") {
+      while(i < fArgv.size()) {
+        i++;
+
+        if (fArgv[i].find("--") != std::string::npos || fArgv[i] == "" || i == fArgv.size()) {
+          i--;
+          break;
+        }
+
+        AddVec("energy", std::stoi(fArgv[i]));
+      }
+    }
+
+    if (fArgv[i] == "--set") {
+      while(i < fArgv.size()) {
+        i++;
+
+        if (fArgv[i].find("--") != std::string::npos || fArgv[i] == "" || i == fArgv.size()) {
+          i--;
+          break;
+        }
+
+        AddVec("set", std::stoi(fArgv[i]));
       }
     }
 
