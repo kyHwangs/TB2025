@@ -19,10 +19,10 @@ AUX:
     POSCUT: 5 #mm
     CORR: 4 #mm
   PION:
-    CC1: 104
-    CC2: 30
-    PS_INIT: 56
-    PS_FIN: 280
+    CC1: 86
+    CC2: 136
+    PS_INIT: 80
+    PS_FIN: 202
   KAON:
     CC1: 40
     CC2: 50
@@ -74,6 +74,7 @@ ModuleConfig:
   MC: [650, 850]
   CC1: [600, 850]
   CC2: [600, 850]
+  IT: [225, 310]
   M1-T1-S: [220, 550]
   M1-T2-S: [220, 550]
   M1-T3-S: [220, 550]

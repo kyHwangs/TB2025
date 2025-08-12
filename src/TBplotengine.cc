@@ -46,8 +46,10 @@ void TBplotengine::init() {
         std::vector<int> interval = fConfig[aName].as<std::vector<int>>();
         fPlotter_Ceren.push_back(TBplotengine::PlotInfo(aCID, aName, aInfo, interval.at(0), interval.at(1)));
 
-        if (fCalcInfo == TBplotengine::CalcInfo::kIntADC)
-          fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 440, -30000., 300000.));
+        if (fCalcInfo == TBplotengine::CalcInfo::kIntADC) {
+         if (aName.find("LC") != std::string::npos) fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 1200, -10000., 50000.));
+         else fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";IntADC;nEvents", 440, -30000., 300000.));
+        }
 
         if (fCalcInfo == TBplotengine::CalcInfo::kPeakADC)
           fPlotter_Ceren.at(i).SetPlot(new TH1D((TString)(aName), ";PeakADC;nEvents", 1152, -512., 4096.));
