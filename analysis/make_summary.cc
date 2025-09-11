@@ -11,14 +11,14 @@
 #include <vector>
 #include <iomanip>
 
-#include <mach/mach.h>
-#include <mach/vm_statistics.h>
-#include <mach/mach_types.h>
-#include <mach/mach_init.h>
-#include <mach/mach_host.h>
+// #include <mach/mach.h>
+// #include <mach/vm_statistics.h>
+// #include <mach/mach_types.h>
+// #include <mach/mach_init.h>
+// #include <mach/mach_host.h>
 
-#include <sys/types.h>
-#include <sys/sysctl.h>
+// #include <sys/types.h>
+// #include <sys/sysctl.h>
 
 #include "TH2.h"
 #include "TF1.h"
@@ -37,39 +37,39 @@
 #include "TGraphErrors.h"
 #include "TCanvas.h"
 
-namespace fs = std::__fs::filesystem;
+namespace fs = std::filesystem;
 
-void GetFormattedRamInfo() {
+// void GetFormattedRamInfo() {
 
-  // Total physical memory
-  int64_t physical_memory;
-  size_t length = sizeof(physical_memory);
-  sysctlbyname("hw.memsize", &physical_memory, &length, NULL, 0);
-  double total_memory_GB = static_cast<double>(physical_memory) / (1024 * 1024 * 1024);
+//   // Total physical memory
+//   int64_t physical_memory;
+//   size_t length = sizeof(physical_memory);
+//   sysctlbyname("hw.memsize", &physical_memory, &length, NULL, 0);
+//   double total_memory_GB = static_cast<double>(physical_memory) / (1024 * 1024 * 1024);
 
-  // Memory usage by this process
-  task_basic_info_data_t info;
-  mach_msg_type_number_t info_count = TASK_BASIC_INFO_COUNT;
-  if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &info_count) == KERN_SUCCESS) {
-      double process_memory_GB = static_cast<double>(info.resident_size) / (1024 * 1024 * 1024);
+//   // Memory usage by this process
+//   task_basic_info_data_t info;
+//   mach_msg_type_number_t info_count = TASK_BASIC_INFO_COUNT;
+//   if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &info_count) == KERN_SUCCESS) {
+//       double process_memory_GB = static_cast<double>(info.resident_size) / (1024 * 1024 * 1024);
 
-      // system memory usage
-      vm_size_t page_size;
-      mach_port_t mach_port = mach_host_self();
-      vm_statistics64_data_t vm_stats;
-      mach_msg_type_number_t count = sizeof(vm_stats) / sizeof(natural_t);
-      if (host_page_size(mach_port, &page_size) == KERN_SUCCESS &&
-          host_statistics64(mach_port, HOST_VM_INFO, (host_info64_t)&vm_stats, &count) == KERN_SUCCESS) {
-          double free_memory_GB = static_cast<double>(vm_stats.free_count * page_size) / (1024 * 1024 * 1024);
-          double used_memory_GB = total_memory_GB - free_memory_GB;
+//       // system memory usage
+//       vm_size_t page_size;
+//       mach_port_t mach_port = mach_host_self();
+//       vm_statistics64_data_t vm_stats;
+//       mach_msg_type_number_t count = sizeof(vm_stats) / sizeof(natural_t);
+//       if (host_page_size(mach_port, &page_size) == KERN_SUCCESS &&
+//           host_statistics64(mach_port, HOST_VM_INFO, (host_info64_t)&vm_stats, &count) == KERN_SUCCESS) {
+//           double free_memory_GB = static_cast<double>(vm_stats.free_count * page_size) / (1024 * 1024 * 1024);
+//           double used_memory_GB = total_memory_GB - free_memory_GB;
 
 
-          printf("%.1f GB / %.1f GB (%0.2f %%) | Current Process: %.2f MB (%.2f %%)",
-            used_memory_GB, total_memory_GB, (used_memory_GB / total_memory_GB * 100),
-            process_memory_GB * 1024., (process_memory_GB / total_memory_GB * 100));
-      }
-  }
-}
+//           printf("%.1f GB / %.1f GB (%0.2f %%) | Current Process: %.2f MB (%.2f %%)",
+//             used_memory_GB, total_memory_GB, (used_memory_GB / total_memory_GB * 100),
+//             process_memory_GB * 1024., (process_memory_GB / total_memory_GB * 100));
+//       }
+//   }
+// }
 
 class HistogramCollection {
   public:
@@ -409,7 +409,7 @@ void MakeReconstruction(std::string fSuffix, int fEnergy, int fRunNumber, std::v
       std::cout << "\r\033[F" //+ ANSI.HIGHLIGHTED_GREEN + ANSI.BLACK
                 << " " << i << " / " << fMaxEvent << " events  " << minutes_left.count() << ":";
       printf("%02d left (%.1f %%) | ", int(seconds_left.count()), percent_done * 100);
-      GetFormattedRamInfo();
+      // GetFormattedRamInfo();
 
       std::cout << ANSI.END << std::endl;
     }
@@ -448,7 +448,7 @@ void MakeReconstruction(std::string fSuffix, int fEnergy, int fRunNumber, std::v
   
   fHistSet_MC->Fit();
 
-  TFile* fFile = new TFile(Form("./PLOT/%s/ROOT/e_%dGeV.root", fSuffix.c_str(), fEnergy), "RECREATE");
+  TFile* fFile = new TFile(Form("./RESULT/%s/ROOT/e_%dGeV.root", fSuffix.c_str(), fEnergy), "RECREATE");
 
   fHistSet_noCut->Save(fFile);
   fHistSet_DWC->Save(fFile);
@@ -461,7 +461,7 @@ void MakeReconstruction(std::string fSuffix, int fEnergy, int fRunNumber, std::v
 
 void MakeResolution(std::string fSuffix, std::vector<int> fEnergy) {
 
-  std::string fBaseDir = Form("./PLOT/%s/ROOT/", fSuffix.c_str());
+  std::string fBaseDir = Form("./RESULT/%s/ROOT/", fSuffix.c_str());
 
   std::vector<double> fRes_Xaxis;
   std::vector<double> fRes_XaxisError;
@@ -781,7 +781,7 @@ void MakeResolution(std::string fSuffix, std::vector<int> fEnergy) {
   fLinGrScint->Draw("P same");
   fLinGrSummed->Draw("P same");
   fLegendLin->Draw("SAME");
-  fCanvas->SaveAs((TString)Form("./PLOT/%s/RESOLUTION/Lin_Response.pdf", fSuffix.c_str()));
+  fCanvas->SaveAs((TString)Form("./RESULT/%s/RESOLUTION/Lin_Response.pdf", fSuffix.c_str()));
 
   fCanvas->Clear();
   fCanvas->cd();
@@ -793,7 +793,7 @@ void MakeResolution(std::string fSuffix, std::vector<int> fEnergy) {
   fResGrSummed->Draw("P same");
   fResFitSummed->Draw("L same");
   fLegendRes->Draw("SAME");
-  fCanvas->SaveAs((TString)Form("./PLOT/%s/RESOLUTION/Res_Resolution.pdf", fSuffix.c_str()));
+  fCanvas->SaveAs((TString)Form("./RESULT/%s/RESOLUTION/Res_Resolution.pdf", fSuffix.c_str()));
 
   fCanvas->Clear();
   fCanvas->cd();
@@ -805,7 +805,7 @@ void MakeResolution(std::string fSuffix, std::vector<int> fEnergy) {
   fResNoiseGrSummed->Draw("P same");
   fResNoiseFitSummed->Draw("L same");
   fLegendNoise->Draw("SAME");
-  fCanvas->SaveAs((TString)Form("./PLOT/%s/RESOLUTION/ResNoise_Resolution.pdf", fSuffix.c_str()));
+  fCanvas->SaveAs((TString)Form("./RESULT/%s/RESOLUTION/ResNoise_Resolution.pdf", fSuffix.c_str()));
   
 
 }
@@ -845,19 +845,22 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  fs::path fDirBase(Form("./PLOT/%s", fSuffix.c_str()));
+  fs::path fDirResult(Form("./RESULT/"));
+  if ( !fs::exists(fDirResult) ) fs::create_directory(fDirResult);
+
+  fs::path fDirBase(Form("./RESULT/%s", fSuffix.c_str()));
   if ( !fs::exists(fDirBase) ) fs::create_directory(fDirBase);
-  
-  fs::path fDirPlot(Form("./PLOT/%s/PLOT", fSuffix.c_str()));
+
+  fs::path fDirPlot(Form("./RESULT/%s/PLOT", fSuffix.c_str()));
   if ( !fs::exists(fDirPlot) ) fs::create_directory(fDirPlot);
   
-  fs::path fDirRoot(Form("./PLOT/%s/ROOT", fSuffix.c_str()));
+  fs::path fDirRoot(Form("./RESULT/%s/ROOT", fSuffix.c_str()));
   if ( !fs::exists(fDirRoot) ) fs::create_directory(fDirRoot);
 
-  fs::path fDirRes(Form("./PLOT/%s/RESOLUTION", fSuffix.c_str()));
+  fs::path fDirRes(Form("./RESULT/%s/RESOLUTION", fSuffix.c_str()));
   if ( !fs::exists(fDirRes) ) fs::create_directory(fDirRes);
 
-  std::ofstream fConfigFile(Form("./PLOT/%s/CONIFG.txt", fSuffix.c_str()));
+  std::ofstream fConfigFile(Form("./RESULT/%s/CONIFG.txt", fSuffix.c_str()));
   if (fConfigFile.is_open()) {
       fConfigFile << "CONFIG: " << fSuffix << std::endl;
       
@@ -880,7 +883,7 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < fEnregy.size(); i++)
     MakeReconstruction(fSuffix, fEnregy.at(i), fRunNumber.at(i), fModule);
 
-  // MakeResolution(fSuffix, fEnregy);
+  MakeResolution(fSuffix, fEnregy);
 
     
   return 1;

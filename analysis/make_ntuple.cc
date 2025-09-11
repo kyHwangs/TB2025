@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include <filesystem>
+
 
 // #include <mach/mach.h>
 // #include <mach/vm_statistics.h>
@@ -27,6 +29,8 @@
 #include "TBconfig.h"
 #include "TBread.h"
 #include "TBobject.h"
+
+namespace fs = std::filesystem;
 
 // void GetFormattedRamInfo() {
 
@@ -112,6 +116,9 @@ int main(int argc, char* argv[]) {
   ObjectCollection* fObj = new ObjectCollection(argc, argv);
   if (fObj->Help())
     return 1;
+
+  fs::path fDirBase(Form("./RAW"));
+  if ( !fs::exists(fDirBase) ) fs::create_directory(fDirBase);
 
   TH2D* fDWC1 = new TH2D("DWC1", "DWC 1 position;X [mm];Y [mm]", 200, -50., 50., 200, -50., 50.);
   // fDWC1->SetStats(0);
@@ -376,7 +383,7 @@ int main(int argc, char* argv[]) {
     fTree->Fill();
   }
 
-  TFile* fFile = new TFile(Form("./RAW/NOISE/TB2025_LCCALIB/Run%d.root", fRunNum), "RECREATE");
+  TFile* fFile = new TFile(Form("./RAW/Run%d.root", fRunNum), "RECREATE");
   fFile->cd();
   fTree->Write();
   fDWC1->Write();
