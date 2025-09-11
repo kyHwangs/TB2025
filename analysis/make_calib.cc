@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
     fHistPeakADC->Fill(fPeakADC);
   }
 
-  TFile* fFile = new TFile(Form("./CALIB_LC/%s_Run%d.root", fModuleList.at(0).c_str(), fRunNum), "RECREATE");
+  TFile* fFile = new TFile(Form("./CALIB/%s_Run%d.root", fModuleList.at(0).c_str(), fRunNum), "RECREATE");
   fFile->cd();
   fHistIntADC->Write();
   fHistPeakADC->Write();
