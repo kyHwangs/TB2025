@@ -57,6 +57,9 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
       while(i < fArgv.size()) {
         i++;
 
+        if (i == fArgv.size())
+          break;
+
         if (fArgv[i].find("--") != std::string::npos || fArgv[i] == "" || i == fArgv.size()) {
           i--;
           break;
@@ -69,6 +72,9 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
     if (fArgv[i] == "--ignore") {
       while(i < fArgv.size()) {
         i++;
+
+        if (i == fArgv.size())
+          break;
 
         if (fArgv[i].find("--") != std::string::npos || fArgv[i] == "" || i == fArgv.size()) {
           i--;
@@ -83,6 +89,9 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
       while(i < fArgv.size()) {
         i++;
 
+        if (i == fArgv.size())
+          break;
+
         if (fArgv[i].find("--") != std::string::npos || fArgv[i] == "" || i == fArgv.size()) {
           i--;
           break;
@@ -96,6 +105,9 @@ ObjectCollection::ObjectCollection(int argc, char* argv[])
       while(i < fArgv.size()) {
         i++;
 
+        if (i == fArgv.size())
+          break;
+        
         if (fArgv[i].find("--") != std::string::npos || fArgv[i] == "" || i == fArgv.size()) {
           i--;
           break;

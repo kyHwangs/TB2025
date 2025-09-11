@@ -330,7 +330,7 @@ void SetPlotFrame(TH1D* plot) {
 
 }
 
-void MakeReconstruction(std::string fSuffix, int fEnergy, int fRunNumber, std::vector<std::string> fModule) {
+void MakeReconstruction(std::string fSuffix, int fEnergy, std::vector<std::string> fModule) {
     
   ANSI_CODE ANSI = ANSI_CODE();
 
@@ -372,7 +372,7 @@ void MakeReconstruction(std::string fSuffix, int fEnergy, int fRunNumber, std::v
 
   std::vector<float> fDWCPOS = {0., 0., 0., 0.};
 
-  TFile* fRawFile = new TFile(Form("./RAW/Run%d.root", fRunNumber), "READ");
+  TFile* fRawFile = new TFile(Form("./RESULT/%s/RAW/e_%dGeV.root", fSuffix.c_str(), fEnergy), "READ");
   
   TTree* fTree = (TTree*)fRawFile->Get("data");
   // fTree->SetDirectory(0);
@@ -700,19 +700,19 @@ void MakeResolution(std::string fSuffix, std::vector<int> fEnergy) {
   fLegendLin->AddEntry(fLinGrScint, (TString)("#font[42]{#color[" + std::to_string(fLinGrScint->GetLineColor()) + "]{Scintillation}}"), "lep");
   fLegendLin->AddEntry(fLinGrSummed, (TString)("#font[42]{#color[" + std::to_string(fLinGrSummed->GetLineColor()) + "]{Summed}}"), "lep");
 
-  TLegend* fLegendRes = new TLegend(0.08, 0.65, 0.55, 0.9);
+  TLegend* fLegendRes = new TLegend(0.13, 0.66, 0.50, 0.88);
   fLegendRes->SetFillStyle(0);
   fLegendRes->SetBorderSize(0);
   fLegendRes->SetTextFont( 42 );
   fLegendRes->SetTextSize( 0.028 );
 
-  TString fStringCeren = (TString)Form("#font[42]{#color[%d]{Cerenkov    #splitline{%.3f^{#pm%.3f} / #sqrt{E} + %.3f^{#pm%.3f}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}", 
+  TString fStringCeren = (TString)Form("#font[42]{#color[%d]{Cerenkov  #splitline{%.3f^{#pm%.3f} / #sqrt{E} + %.3f^{#pm%.3f}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}", 
     fLinGrCeren->GetLineColor(), fResFitCeren->GetParameter(1), fResFitCeren->GetParError(1), fResFitCeren->GetParameter(0), fResFitCeren->GetParError(0), fResFitCeren->GetChisquare(), fResFitCeren->GetNDF());
   
-  TString fStringScint = (TString)Form("#font[42]{#color[%d]{Scintillation  #splitline{%.3f^{#pm%.3f} / #sqrt{E} + %.3f^{#pm%.3f}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}", 
+  TString fStringScint = (TString)Form("#font[42]{#color[%d]{Scintillation #splitline{%.3f^{#pm%.3f} / #sqrt{E} + %.3f^{#pm%.3f}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}", 
     fLinGrScint->GetLineColor(), fResFitScint->GetParameter(1), fResFitScint->GetParError(1), fResFitScint->GetParameter(0), fResFitScint->GetParError(0), fResFitScint->GetChisquare(), fResFitScint->GetNDF());
   
-  TString fStringSummed = (TString)Form("#font[42]{#color[%d]{Summed      #splitline{%.3f^{#pm%.3f} / #sqrt{E} + %.3f^{#pm%.3f}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}", 
+  TString fStringSummed = (TString)Form("#font[42]{#color[%d]{Summed  #splitline{%.3f^{#pm%.3f} / #sqrt{E} + %.3f^{#pm%.3f}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}", 
     fLinGrSummed->GetLineColor(), fResFitSummed->GetParameter(1), fResFitSummed->GetParError(1), fResFitSummed->GetParameter(0), fResFitSummed->GetParError(0), fResFitSummed->GetChisquare(), fResFitSummed->GetNDF());
   
   fLegendRes->AddEntry(fLinGrCeren, fStringCeren, "lep");
@@ -753,13 +753,13 @@ void MakeResolution(std::string fSuffix, std::vector<int> fEnergy) {
   if (fSummedNoiseSqrt < 0) fSummedNoiseSqrt = std::abs(fSummedNoiseSqrt);
   
 
-  TString fCerenNoiseTerm = (TString)Form("#font[42]{#color[%d]{Cerenkov    #splitline{%.3f^{#pm%.3f} #oplus %.3f^{#pm%.3f} / E #oplus %.3f^{#pm%.3f} / #sqrt{E}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}",
+  TString fCerenNoiseTerm = (TString)Form("#scale[0.8]{#font[42]{#color[%d]{Cerenkov  #splitline{%.3f^{#pm%.3f} #oplus %.3f^{#pm%.3f} / E #oplus %.3f^{#pm%.3f} / #sqrt{E}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}}",
     fLinGrCeren->GetLineColor(), fCerenNoiseConst, fCerenNoiseConstError, fCerenNoiseLinear, fCerenNoiseLinearError, fCerenNoiseSqrt, fCerenNoiseSqrtError, fResNoiseFitCeren->GetChisquare(), fResNoiseFitCeren->GetNDF());
 
-  TString fScintNoiseTerm = (TString)Form("#font[42]{#color[%d]{Scintillation  #splitline{%.3f^{#pm%.3f} #oplus %.3f^{#pm%.3f} / E #oplus %.3f^{#pm%.3f} / #sqrt{E}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}",
+  TString fScintNoiseTerm = (TString)Form("#scale[0.8]{#font[42]{#color[%d]{Scintillation #splitline{%.3f^{#pm%.3f} #oplus %.3f^{#pm%.3f} / E #oplus %.3f^{#pm%.3f} / #sqrt{E}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}}",
     fLinGrScint->GetLineColor(), fScintNoiseConst, fScintNoiseConstError, fScintNoiseLinear, fScintNoiseLinearError, fScintNoiseSqrt, fScintNoiseSqrtError, fResNoiseFitScint->GetChisquare(), fResNoiseFitScint->GetNDF());
 
-  TString fSummedNoiseTerm = (TString)Form("#font[42]{#color[%d]{Summed      #splitline{%.3f^{#pm%.3f} #oplus %.3f^{#pm%.3f} / E #oplus %.3f^{#pm%.3f} / #sqrt{E}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}",
+  TString fSummedNoiseTerm = (TString)Form("#scale[0.8]{#font[42]{#color[%d]{Summed  #splitline{%.3f^{#pm%.3f} #oplus %.3f^{#pm%.3f} / E #oplus %.3f^{#pm%.3f} / #sqrt{E}}{#scale[0.7]{#chi^{2}/NDF = %.3f/%d}} }}}",
     fLinGrSummed->GetLineColor(), fSummedNoiseConst, fSummedNoiseConstError, fSummedNoiseLinear, fSummedNoiseLinearError, fSummedNoiseSqrt, fSummedNoiseSqrtError, fResNoiseFitSummed->GetChisquare(), fResNoiseFitSummed->GetNDF());
   
   TLegend* fLegendNoise = new TLegend(0.13, 0.66, 0.50, 0.88);
@@ -806,8 +806,6 @@ void MakeResolution(std::string fSuffix, std::vector<int> fEnergy) {
   fResNoiseFitSummed->Draw("L same");
   fLegendNoise->Draw("SAME");
   fCanvas->SaveAs((TString)Form("./RESULT/%s/RESOLUTION/ResNoise_Resolution.pdf", fSuffix.c_str()));
-  
-
 }
 
 
@@ -824,9 +822,6 @@ int main(int argc, char* argv[]) {
 
   std::vector<int> fEnregy = {};
   fObj->GetVector("energy", &fEnregy);
-
-  std::vector<int> fRunNumber = {};
-  fObj->GetVector("set", &fRunNumber);
 
   std::vector<std::string> fModule = {};
   fObj->GetVector("module", &fModule);
@@ -873,15 +868,11 @@ int main(int argc, char* argv[]) {
 
       }
       
-      fConfigFile << "RUN: " << std::endl;
-        for (int i = 0; i < fRunNumber.size(); i++)
-          fConfigFile << "    " << fEnregy.at(i) << " GeV - " << fRunNumber.at(i) << std::endl;
-      
       fConfigFile.close();
   }
 
   for (int i = 0; i < fEnregy.size(); i++)
-    MakeReconstruction(fSuffix, fEnregy.at(i), fRunNumber.at(i), fModule);
+    MakeReconstruction(fSuffix, fEnregy.at(i), fModule);
 
   MakeResolution(fSuffix, fEnregy);
 
