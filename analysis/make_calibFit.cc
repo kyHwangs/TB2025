@@ -6,15 +6,6 @@
 #include <string>
 #include <chrono>
 
-#include <mach/mach.h>
-#include <mach/vm_statistics.h>
-#include <mach/mach_types.h>
-#include <mach/mach_init.h>
-#include <mach/mach_host.h>
-
-#include <sys/types.h>
-#include <sys/sysctl.h>
-
 #include "TH1.h"
 #include "TF1.h"
 
