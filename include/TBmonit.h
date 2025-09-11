@@ -27,7 +27,7 @@ public:
   void SetMaxEvent(int fMaxEvent_) { fMaxEvent = fMaxEvent_; }
   void SetMaxFile(int fMaxFile_) { fMaxFile = fMaxFile_; }
   void SetLive() { fIsLive = true; }
-  void GetFormattedRamInfo();
+  // void GetFormattedRamInfo();
 
 private:
   TBconfig fConfig;

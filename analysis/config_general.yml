@@ -1,4 +1,4 @@
-BaseDirectory: "/Volumes/HDD_16TB_3" # "/Users/yhep/scratch/YUdaq"
+BaseDirectory: "/pnfs/knu.ac.kr/data/cms/store/user/sungwon/2025_DRC_TB_Data" # "/Users/yhep/scratch/YUdaq"
 Mapping: "../mapping/mapping_TB2025_v1.root"
 AUX:
   PS:
@@ -14,7 +14,8 @@ AUX:
     IntADC: 100000
     PeakADC: 1000
   DWC:
-    CENTER: [-5.24, -8.416, -2.834, -9.524] # 1X, 1Y, 2X, 2Y
+    # CENTER: [-5.24, -8.416, -2.834, -9.524] # 1X, 1Y, 2X, 2Y
+    CENTER: [-5.4521, -8.46707, -2.8199, -9.7349]
     CALIB: [0.180654, 0.217961, -0.180342, -0.0994697, 0.181416, -0.00911072, -0.17822, -0.0489771]
     POSCUT: 5 #mm
     CORR: 4 #mm
