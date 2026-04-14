@@ -211,6 +211,7 @@ TBmidbase FileController<T>::readMetadata()
   long long coarse_time;
   int itmp;
   long long ltmp;
+  std::vector<int> drsStop;
 
   // read header
   fread(data, 1, 64, fRawData);
@@ -319,9 +320,19 @@ TBmidbase FileController<T>::readMetadata()
   coarse_time = coarse_time * 1000; // get ns
   local_trig_time = fine_time + coarse_time;
 
+  for (int k = 0; k < 4; k++) {
+    
+    int drs_stop_tmp = data[34 + k * 2] & 0xFF;
+    int itmp = data[35 + k * 2] & 0xFF;
+
+    drsStop.push_back(drs_stop_tmp + itmp);
+  }
+
+
   auto amid = TBmidbase(tcb_trig_number, run_number, mid);
   amid.setTCB(tcb_trig_type, tcb_trig_number, tcb_trig_time);
   amid.setLocal(local_trig_number, local_trigger_pattern, local_trig_time);
+  amid.setDrsStop(drsStop);
 
   return std::move(amid);
 }
